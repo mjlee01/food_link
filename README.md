@@ -20,6 +20,12 @@ mobile, web, and desktop from a single codebase. Flutter works with existing
 code, is used by developers and organizations around the world, and is free and
 open source.
 
+## Quickstart
+1. Clone Repo
+```
+git clone https://github.com/mjlee01/food_link.git
+```
+
 ## Documentation
 
 * [Install Flutter](https://flutter.dev/get-started/)
@@ -31,18 +37,6 @@ For announcements about new releases, follow the
 [flutter-announce@googlegroups.com](https://groups.google.com/forum/#!forum/flutter-announce)
 mailing list. Our documentation also tracks [breaking
 changes](https://docs.flutter.dev/release/breaking-changes) across releases.
-
-## Terms of service
-
-The Flutter tool may occasionally download resources from Google servers. By
-downloading or using the Flutter SDK, you agree to the Google Terms of Service:
-https://policies.google.com/terms
-
-For example, when installed from GitHub (as opposed to from a prepackaged
-archive), the Flutter tool will download the Dart SDK from Google servers
-immediately when first run, as it is used to execute the `flutter` tool itself.
-This will also occur when Flutter is upgraded (e.g. by running the `flutter
-upgrade` command).
 
 ## About Flutter
 
