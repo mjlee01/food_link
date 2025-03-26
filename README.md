@@ -25,6 +25,10 @@ open source.
 ```
 git clone https://github.com/mjlee01/food_link.git
 ```
+2. Install dependencies
+```
+flutter pub get
+```
 
 ## Documentation
 
