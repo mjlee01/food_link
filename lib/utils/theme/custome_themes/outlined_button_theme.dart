@@ -4,8 +4,8 @@ import '../../constants/colors.dart';
 import '../../constants/sizes.dart';
 
 /* -- Light & Dark Outlined Button Themes -- */
-class flOutlinedButtonTheme {
-  flOutlinedButtonTheme._(); //To avoid creating instances
+class FLOutlinedButtonTheme {
+  FLOutlinedButtonTheme._(); //To avoid creating instances
 
 
   /* -- Light Theme -- */

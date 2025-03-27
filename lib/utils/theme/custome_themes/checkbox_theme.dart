@@ -3,8 +3,8 @@ import '../../constants/colors.dart';
 import '../../constants/sizes.dart';
 
 /// Custom Class for Light & Dark Text Themes
-class flCheckboxTheme {
-  flCheckboxTheme._(); // To avoid creating instances
+class FLCheckboxTheme {
+  FLCheckboxTheme._(); // To avoid creating instances
 
   /// Customizable Light Text Theme
   static CheckboxThemeData lightCheckboxTheme = CheckboxThemeData(
