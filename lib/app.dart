@@ -10,6 +10,11 @@ class FoodLink extends StatelessWidget {
       themeMode: ThemeMode.system,
       theme: FLAppTheme.lightTheme,
       darkTheme: FLAppTheme.darkTheme,
+      home: Scaffold(
+        body: Center(
+          child: Text('Hello World'),
+        ),
+      ),
     );
   }
 }
