@@ -12,6 +12,7 @@ class FoodLink extends StatelessWidget {
       theme: FLAppTheme.lightTheme,
       darkTheme: FLAppTheme.darkTheme,
       home: const MainScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
