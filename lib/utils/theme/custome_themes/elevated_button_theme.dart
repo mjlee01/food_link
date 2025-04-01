@@ -11,6 +11,7 @@ class FLElevatedButtonTheme {
   static final lightElevatedButtonTheme  = ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
       elevation: 0,
+      minimumSize: const Size(350, 40),
       foregroundColor: FLColors.light,
       backgroundColor: FLColors.primary,
       disabledForegroundColor: FLColors.darkGrey,
@@ -26,6 +27,7 @@ class FLElevatedButtonTheme {
   static final darkElevatedButtonTheme = ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
       elevation: 0,
+      minimumSize: const Size(350, 40),
       foregroundColor: FLColors.light,
       backgroundColor: FLColors.primary,
       disabledForegroundColor: FLColors.darkGrey,
