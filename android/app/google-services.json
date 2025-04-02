@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "383144624227",
+    "project_id": "food-link-b011d",
+    "storage_bucket": "food-link-b011d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:383144624227:android:8c0b4411dcd0d344d8f856",
+        "android_client_info": {
+          "package_name": "com.example.food_link"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBDpx-4TQkbNZiP6_-MiD4CWQp2ONDkBuw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
