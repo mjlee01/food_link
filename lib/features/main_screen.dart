@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
+import 'Recipie/recipe_view.dart' show RecipePage;
 import 'home/home_view.dart';
 import 'inventory/inventory_view.dart';
 import 'scan/scan_view.dart';
 import 'foodhub/foodhub_view.dart';
-import 'profile/profile_view.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -16,12 +16,12 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = const [
+  final List<Widget> _pages = [
     HomePage(),
-    SearchPage(),
+    InventoryPage(),
     FavoritesPage(),
     NotificationsPage(),
-    ProfilePage(),
+    RecipePage(),
   ];
 
   final _navBarItems = [
