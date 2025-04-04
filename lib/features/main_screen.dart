@@ -18,11 +18,12 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _pages = [
     HomePage(),
-    SearchPage(),
-    ScanPage(),
     InventoryPage(),
-    NotificationsPage(),
-    RecipePage(),
+    ScanPage(),
+    // NotificationsPage(),
+    // FavoritesPage(),
+    FoodHubPage(),
+    ProfilePage(),
   ];
 
   final _navBarItems = [
@@ -57,7 +58,8 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Food Link'),
+        title: const Text('Food Link', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.green,
       ),
       body: _pages[_currentIndex],
       bottomNavigationBar: Container(
