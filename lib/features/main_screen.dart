@@ -20,7 +20,9 @@ class _MainScreenState extends State<MainScreen> {
     HomePage(),
     SearchPage(),
     ScanPage(),
-    NotificationsPage(),
+    // NotificationsPage(),
+    // FavoritesPage(),
+    FoodHubPage(),
     ProfilePage(),
   ];
 
@@ -56,7 +58,8 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Food Link'),
+        title: const Text('Food Link', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.green,
       ),
       body: _pages[_currentIndex],
       bottomNavigationBar: Container(
