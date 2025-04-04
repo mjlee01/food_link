@@ -12,7 +12,7 @@ class ScanPage extends StatefulWidget {
   const ScanPage({super.key});
 
   @override
-  _ScanPageState createState() => _ScanPageState();
+  State<ScanPage> createState() => _ScanPageState();
 }
 
 typedef GroceryTypeEntry = DropdownMenuEntry<GroceryType>;
@@ -145,13 +145,17 @@ class _ScanPageState extends State<ScanPage>
   }
 
   Future<void> _capturePhoto() async {
-    if (_cameraController == null || !_cameraController!.value.isInitialized)
+    if (_cameraController == null || !_cameraController!.value.isInitialized) {
       return;
+    }
 
     final XFile photo = await _cameraController!.takePicture();
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text("Photo captured: ${photo.path}")));
+
+    if (!mounted) return;
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Photo captured: ${photo.path}")),
+    );
   }
 
   void _flipCamera() {
@@ -166,12 +170,15 @@ class _ScanPageState extends State<ScanPage>
   Future<void> _selectFromGallery() async {
     // Implement image selection from gallery
     // For example, using image_picker package
-    final ImagePicker _picker = ImagePicker();
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    
+    if (!mounted) return;
+    
     if (image != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Image selected: ${image.path}")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Image selected: ${image.path}")),
+      );
     }
   }
 
@@ -189,15 +196,6 @@ class _ScanPageState extends State<ScanPage>
         ).format(picked); // Auto-fill text field
       });
     }
-  }
-
-  /// Handles text input changes
-  void _onTextChanged(String value) {
-    try {
-      DateTime parsedDate = DateFormat(
-        'dd/MM/yyyy',
-      ).parseStrict(value); // Ensure strict format
-    } catch (e) {}
   }
 
   @override
