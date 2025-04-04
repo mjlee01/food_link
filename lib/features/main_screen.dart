@@ -5,6 +5,7 @@ import 'home/home_view.dart';
 import 'inventory/inventory_view.dart';
 import 'scan/scan_view.dart';
 import 'foodhub/foodhub_view.dart';
+import 'profile/profile_view.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
