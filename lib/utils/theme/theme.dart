@@ -28,6 +28,7 @@ class FLAppTheme {
     checkboxTheme: FLCheckboxTheme.lightCheckboxTheme,
     outlinedButtonTheme: FLOutlinedButtonTheme.lightOutlinedButtonTheme,
     inputDecorationTheme: FLTextFormFieldTheme.lightInputDecorationTheme,
+    colorScheme: ColorScheme.fromSeed(seedColor: FLColors.primary, brightness: Brightness.light),
   );
 
   static ThemeData darkTheme = ThemeData(
@@ -45,5 +46,6 @@ class FLAppTheme {
     chipTheme: FLChipTheme.darkChipTheme,
     outlinedButtonTheme: FLOutlinedButtonTheme.darkOutlinedButtonTheme,
     inputDecorationTheme: FLTextFormFieldTheme.darkInputDecorationTheme,
+    colorScheme: ColorScheme.fromSeed(seedColor: FLColors.primary, brightness: Brightness.dark),
   );
 }
