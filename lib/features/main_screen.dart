@@ -21,7 +21,8 @@ class _MainScreenState extends State<MainScreen> {
     HomePage(),
     InventoryPage(),
     ScanPage(),
-    NotificationsPage(),
+    FoodHubPage(),
+    // NotificationsPage(),
     ProfilePage(),
   ];
 
