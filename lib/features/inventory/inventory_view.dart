@@ -15,6 +15,9 @@ class _InventoryPageState extends State<InventoryPage>
     with SingleTickerProviderStateMixin {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
+  TextEditingController _searchController = TextEditingController();
+  String _searchTerm = '';
+
   void showGroceryDetailsDialog(
     BuildContext context,
     Map<String, dynamic> data,
@@ -41,7 +44,9 @@ class _InventoryPageState extends State<InventoryPage>
                   size: 16,
                 ),
                 style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.all(Colors.black.withValues(alpha: 0.03)),
+                  backgroundColor: WidgetStateProperty.all(
+                    Colors.black.withValues(alpha: 0.03),
+                  ),
                   padding: WidgetStateProperty.all(EdgeInsets.zero),
                 ),
               ),
@@ -54,7 +59,12 @@ class _InventoryPageState extends State<InventoryPage>
                   [
                         if (data['image_url'] != null &&
                             data['image_url'].toString().isNotEmpty)
-                          Center(child: Image.network(data['image_url'], height: 200)),
+                          Center(
+                            child: Image.network(
+                              data['image_url'],
+                              height: 200,
+                            ),
+                          ),
                         SizedBox(height: 16),
                         Text("Category: ${data['category']}"),
                         Text("Expiration Date: $formattedExpiry"),
@@ -113,8 +123,16 @@ class _InventoryPageState extends State<InventoryPage>
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Icon(Icons.add, color: FLColors.black, size: 16),
-                      Icon(Icons.food_bank_outlined, color: FLColors.black, size: 16),
+                      // Icon(Icons.add, color: FLColors.black, size: 16),
+                      Icon(
+                        Icons.food_bank_outlined,
+                        color: FLColors.black,
+                        size: 16,
+                      ),
+                      Text(
+                        "Recipe",
+                        style: TextStyle(color: FLColors.black, fontSize: 16),
+                      ),
                     ],
                   ),
                 ),
@@ -134,10 +152,10 @@ class _InventoryPageState extends State<InventoryPage>
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Icon(Icons.delete, color: FLColors.error, size: 16),
-                      Text(
-                        "Delete",
-                        style: TextStyle(color: FLColors.error, fontSize: 16),
-                      ),
+                      // Text(
+                      //   "Delete",
+                      //   style: TextStyle(color: FLColors.error, fontSize: 16),
+                      // ),
                     ],
                   ),
                 ),
@@ -152,143 +170,263 @@ class _InventoryPageState extends State<InventoryPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: StreamBuilder(
-        stream: _db.collection('groceries').snapshots(),
-        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (!snapshot.hasData) {
-            return Center(child: CircularProgressIndicator());
-          }
-
-          Map<String, List<DocumentSnapshot>> groupedData = {};
-          for (var doc in snapshot.data!.docs) {
-            var category = doc['category'];
-            if (!groupedData.containsKey(category)) {
-              groupedData[category] = [];
-            }
-            groupedData[category]!.add(doc);
-          }
-
-          List<Widget> categoryWidgets = [];
-          groupedData.forEach((category, products) {
-            categoryWidgets.add(
-              Container(
-                margin: EdgeInsets.only(bottom: 16.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 10.0,
+            ),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search grocery...',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade300),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withValues(alpha: 0.1),
-                      blurRadius: 8,
-                      spreadRadius: 2,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        top: 12.0,
-                        bottom: 8.0,
-                        left: 12.0,
-                        right: 12.0,
-                      ),
-                      child: Text(
-                        category,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    ...products.map<Widget>((doc) {
-                      var data = doc.data() as Map<String, dynamic>;
-                      var expiryDate =
-                          (data['expiry_date'] as Timestamp).toDate();
-                      String formattedDate = DateFormat(
-                        'dd/MM/yyyy',
-                      ).format(expiryDate);
-                      int daysRemaining =
-                          expiryDate.difference(DateTime.now()).inDays;
-                      Color badgeColor =
-                          daysRemaining <= 0
-                              ? FLColors.error
-                              : daysRemaining <= 2
-                              ? FLColors.secondary
-                              : Colors.green;
-
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4.0),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            border: Border(
-                              top: BorderSide(
-                                color: Colors.grey.shade300,
-                                width: 1.0,
-                              ),
-                            ),
-                          ),
-                          child: ListTile(
-                            onTap: () {
-                              showGroceryDetailsDialog(context, data);
-                            },
-                            title: Text(
-                              data['name'],
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            subtitle: Row(
-                              children: [
-                                Icon(
-                                  FontAwesomeIcons.solidCalendarDays,
-                                  size: 14,
-                                ),
-                                SizedBox(width: 4),
-                                Text(
-                                  "Expires: $formattedDate - ${data['quantity']} ${data['unit']}",
-                                ),
-                              ],
-                            ),
-                            trailing: Container(
-                              padding: EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: badgeColor,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                "$daysRemaining days",
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    }),
-                  ],
+                  borderSide: BorderSide(color: Colors.grey),
                 ),
               ),
-            );
-          });
-
-          return Container(
-            padding: EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: FLColors.white,
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: FLColors.grey.withValues(alpha: 0.2),
-                  spreadRadius: 1,
-                  blurRadius: 5,
-                  offset: Offset(0, 3),
-                ),
-              ],
+              onChanged: (value) {
+                setState(() {
+                  _searchTerm = value.toLowerCase();
+                });
+              },
             ),
-            child: ListView(children: categoryWidgets),
-          );
-        },
+          ),
+          Expanded(
+            child: StreamBuilder(
+              stream: _db.collection('groceries').snapshots(),
+              builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (!snapshot.hasData) {
+                  return Center(child: CircularProgressIndicator());
+                }
+
+                Map<String, List<DocumentSnapshot>> groupedData = {};
+                for (var doc in snapshot.data!.docs) {
+                  var category = doc['category'];
+                  if (!groupedData.containsKey(category)) {
+                    groupedData[category] = [];
+                  }
+                  groupedData[category]!.add(doc);
+                }
+
+                List<Widget> categoryWidgets = [];
+                groupedData.forEach((category, products) {
+                  products =
+                      products.where((doc) {
+                        var data = doc.data() as Map<String, dynamic>;
+                        return data['name'].toString().toLowerCase().contains(
+                          _searchTerm,
+                        );
+                      }).toList();
+                  if (products.isNotEmpty) {
+                    categoryWidgets.add(
+                      Container(
+                        margin: EdgeInsets.only(bottom: 16.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade300),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withValues(alpha: 0.1),
+                              blurRadius: 8,
+                              spreadRadius: 2,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                top: 12.0,
+                                bottom: 8.0,
+                                left: 12.0,
+                                right: 12.0,
+                              ),
+                              child: Text(
+                                category,
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            ...products.map<Widget>((doc) {
+                              var data = doc.data() as Map<String, dynamic>;
+                              var expiryDate =
+                                  (data['expiry_date'] as Timestamp).toDate();
+                              String formattedDate = DateFormat(
+                                'dd/MM/yyyy',
+                              ).format(expiryDate);
+                              int daysRemaining =
+                                  expiryDate.difference(DateTime.now()).inDays;
+                              Color badgeColor =
+                                  daysRemaining <= 0
+                                      ? FLColors.error
+                                      : daysRemaining <= 2
+                                      ? FLColors.secondary
+                                      : Colors.green;
+
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 4.0,
+                                ),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      top: BorderSide(
+                                        color: Colors.grey.shade300,
+                                        width: 1.0,
+                                      ),
+                                    ),
+                                  ),
+                                  child: ListTile(
+                                    onTap: () {
+                                      showGroceryDetailsDialog(context, data);
+                                    },
+                                    title: Text(
+                                      data['name'],
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    subtitle: Row(
+                                      children: [
+                                        Icon(
+                                          FontAwesomeIcons.solidCalendarDays,
+                                          size: 14,
+                                        ),
+                                        SizedBox(width: 4),
+                                        Text(
+                                          "Expires: $formattedDate - ${data['quantity']} ${data['unit']}",
+                                        ),
+                                      ],
+                                    ),
+                                    trailing: Container(
+                                      padding: EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: badgeColor,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        "$daysRemaining days",
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }),
+                          ],
+                        ),
+                      ),
+                    );
+                  } else {
+                    categoryWidgets.add(
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16.0),
+                        child: Container(
+                          margin: EdgeInsets.only(bottom: 16.0),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey.shade300),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withValues(alpha: 0.1),
+                                blurRadius: 8,
+                                spreadRadius: 2,
+                                offset: Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  top: 12.0,
+                                  bottom: 8.0,
+                                  left: 12.0,
+                                  right: 12.0,
+                                ),
+                                child: Text(
+                                  category,
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 4.0,
+                                ),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      top: BorderSide(
+                                        color: Colors.grey.shade300,
+                                        width: 1.0,
+                                      ),
+                                    ),
+                                  ),
+                                  child: ListTile(
+                                    title: Row(
+                                      spacing: 6,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          FontAwesomeIcons.question,
+                                          size: 14,
+                                          color: FLColors.secondary,
+                                        ),
+                                        Text(
+                                          "No items found in $category",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.normal,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                });
+
+                return Container(
+                  padding: EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    color: FLColors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: FLColors.grey.withValues(alpha: 0.2),
+                        spreadRadius: 1,
+                        blurRadius: 5,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: ListView(children: categoryWidgets),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
