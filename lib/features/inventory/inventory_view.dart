@@ -15,7 +15,7 @@ class _InventoryPageState extends State<InventoryPage>
     with SingleTickerProviderStateMixin {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   String _searchTerm = '';
 
   void showGroceryDetailsDialog(
@@ -142,7 +142,7 @@ class _InventoryPageState extends State<InventoryPage>
                     final outerContext = context;
                     showDialog(
                       context: outerContext,
-                      builder: (BuildContext context) {
+                      builder: (BuildContext dialogContext) {
                         return AlertDialog(
                           title: Text('Delete Confirmation'),
                           content: Text(
@@ -159,7 +159,8 @@ class _InventoryPageState extends State<InventoryPage>
                                 ),
                               ),
                               child: Text('Cancel'),
-                              onPressed: () => Navigator.of(context).pop(),
+                              onPressed:
+                                  () => Navigator.of(dialogContext).pop(),
                             ),
                             TextButton(
                               style: ButtonStyle(
@@ -172,21 +173,50 @@ class _InventoryPageState extends State<InventoryPage>
                                 style: TextStyle(color: FLColors.textWhite),
                               ),
                               onPressed: () async {
-                                Navigator.of(context).pop();
-                                Navigator.of(context).pop();
-                                await FirebaseFirestore.instance
-                                    .collection('groceries')
-                                    .doc(doc.id)
-                                    .delete();
-                                ScaffoldMessenger.of(outerContext).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      '${data['name']} record is deleted successfully',
-                                    ),
-                                    backgroundColor: FLColors.primary,
-                                    duration: Duration(seconds: 2),
-                                  ),
+                                Navigator.of(dialogContext).pop();
+                                Navigator.of(outerContext).pop();
+
+                                final backupData = Map<String, dynamic>.from(
+                                  data,
                                 );
+                                final docRef = FirebaseFirestore.instance
+                                    .collection('groceries')
+                                    .doc(doc.id);
+
+                                await docRef.delete();
+
+                                if (!mounted) return;
+
+                                Future.delayed(Duration.zero, () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    // use fresh context here
+                                    SnackBar(
+                                      content: Text(
+                                        '${data['name']} deleted successfully',
+                                      ),
+                                      backgroundColor: FLColors.primary,
+                                      duration: Duration(seconds: 4),
+                                      action: SnackBarAction(
+                                        label: 'Undo',
+                                        textColor: Colors.white,
+                                        onPressed: () async {
+                                          await docRef.set(backupData);
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                '${data['name']} restored',
+                                              ),
+                                              backgroundColor: Colors.green,
+                                              duration: Duration(seconds: 2),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                });
                               },
                             ),
                           ],
@@ -314,18 +344,25 @@ class _InventoryPageState extends State<InventoryPage>
                               String formattedDate;
                               int daysRemaining;
                               Color badgeColor;
-                              
+
                               if (data['expiry_date'] == null) {
                                 formattedDate = "No expiry date";
                                 daysRemaining = 0;
                                 badgeColor = Colors.grey;
                               } else {
-                                var expiryDate = (data['expiry_date'] as Timestamp).toDate();
-                                formattedDate = DateFormat('dd/MM/yyyy').format(expiryDate);
-                                daysRemaining = expiryDate.difference(DateTime.now()).inDays;
-                                badgeColor = daysRemaining <= 0
-                                    ? FLColors.error
-                                    : daysRemaining <= 2
+                                var expiryDate =
+                                    (data['expiry_date'] as Timestamp).toDate();
+                                formattedDate = DateFormat(
+                                  'dd/MM/yyyy',
+                                ).format(expiryDate);
+                                daysRemaining =
+                                    expiryDate
+                                        .difference(DateTime.now())
+                                        .inDays;
+                                badgeColor =
+                                    daysRemaining <= 0
+                                        ? FLColors.error
+                                        : daysRemaining <= 2
                                         ? FLColors.secondary
                                         : Colors.green;
                               }
