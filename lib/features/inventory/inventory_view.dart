@@ -139,7 +139,7 @@ class _InventoryPageState extends State<InventoryPage>
                 ),
                 TextButton(
                   onPressed: () {
-                    final outerContext = context; 
+                    final outerContext = context;
                     showDialog(
                       context: outerContext,
                       builder: (BuildContext context) {
@@ -311,19 +311,24 @@ class _InventoryPageState extends State<InventoryPage>
                             ),
                             ...products.map<Widget>((doc) {
                               var data = doc.data() as Map<String, dynamic>;
-                              var expiryDate =
-                                  (data['expiry_date'] as Timestamp).toDate();
-                              String formattedDate = DateFormat(
-                                'dd/MM/yyyy',
-                              ).format(expiryDate);
-                              int daysRemaining =
-                                  expiryDate.difference(DateTime.now()).inDays;
-                              Color badgeColor =
-                                  daysRemaining <= 0
-                                      ? FLColors.error
-                                      : daysRemaining <= 2
-                                      ? FLColors.secondary
-                                      : Colors.green;
+                              String formattedDate;
+                              int daysRemaining;
+                              Color badgeColor;
+                              
+                              if (data['expiry_date'] == null) {
+                                formattedDate = "No expiry date";
+                                daysRemaining = 0;
+                                badgeColor = Colors.grey;
+                              } else {
+                                var expiryDate = (data['expiry_date'] as Timestamp).toDate();
+                                formattedDate = DateFormat('dd/MM/yyyy').format(expiryDate);
+                                daysRemaining = expiryDate.difference(DateTime.now()).inDays;
+                                badgeColor = daysRemaining <= 0
+                                    ? FLColors.error
+                                    : daysRemaining <= 2
+                                        ? FLColors.secondary
+                                        : Colors.green;
+                              }
 
                               return Padding(
                                 padding: const EdgeInsets.symmetric(
