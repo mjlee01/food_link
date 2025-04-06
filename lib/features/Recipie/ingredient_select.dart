@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:food_link/features/Recipie/recipe_model.dart';
 import 'generate_recipe.dart';
 import 'recipe_display_view.dart';
 
@@ -29,6 +30,8 @@ class _IngredientSelectPageState extends State<IngredientSelectPage> {
     'Honey',
   ];
 
+
+  late Recipe recipeData;
   final List<String> selectedIngredients = [];
   bool isLoading = false;
 
@@ -134,21 +137,7 @@ class _IngredientSelectPageState extends State<IngredientSelectPage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => RecipeDisplayPage(
-              recipeName: recipeData['name'] ?? 'Generated Recipe',
-              prepTime: recipeData['prepTime'] ?? 'N/A',
-              cookTime: recipeData['cookTime'] ?? 'N/A',
-              servings: recipeData['servings'] ?? 'N/A',
-              ingredients: (recipeData['ingredients'] as List?)?.map((i) {
-                if (i is String) return i;
-                if (i is Map) {
-                  return '${i['amount']} ${i['name']}${i['essential'] == false ? ' (optional)' : ''}';
-                }
-                return i.toString();
-              }).toList() ?? [],
-              instructions: (recipeData['instructions'] as List?)?.cast<String>() ?? [],
-              notes: recipeData['notes']?.toString(),
-            ),
+            builder: (context) => RecipeDisplayPage(recipe: recipeData, isNewRecipe: true,),
           ),
         );
       }
