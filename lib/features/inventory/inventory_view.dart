@@ -88,12 +88,33 @@ class _InventoryPageState extends State<InventoryPage>
                     ),
                   ),
                   child: Row(
+                    spacing: 2,
                     children: [
                       Icon(Icons.share, color: FLColors.info, size: 16),
                       Text(
                         "Share",
                         style: TextStyle(color: FLColors.info, fontSize: 16),
                       ),
+                    ],
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  style: TextButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      side: BorderSide(color: FLColors.black, width: 1),
+                    ),
+                  ),
+                  child: Row(
+                    spacing: 2,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Icon(Icons.add, color: FLColors.black, size: 16),
+                      Icon(Icons.food_bank_outlined, color: FLColors.black, size: 16),
                     ],
                   ),
                 ),
