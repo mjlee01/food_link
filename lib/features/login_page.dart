@@ -368,10 +368,11 @@ class _LoginPageState extends State<LoginPage>
           ),
           obscureText: true,
         ),
-        SizedBox(height: 16),
+        SizedBox(height: 8),
 
         // Agree to Terms Checkbox
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Checkbox(
               value: agreeToTerms,
@@ -381,9 +382,19 @@ class _LoginPageState extends State<LoginPage>
                 });
               },
             ),
-            Text("I agree to the Terms of Service and Privacy Policy"),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Text(
+                  "I agree to the Terms of Service and Privacy Policy",
+                  softWrap: true,
+                  style: TextStyle(fontSize: 14),
+                ),
+              ),
+            ),
           ],
         ),
+        SizedBox(height: 12),
 
         // Sign Up Button
         SizedBox(
