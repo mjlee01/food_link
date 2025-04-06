@@ -5,6 +5,10 @@ import 'home/home_view.dart';
 import 'inventory/inventory_view.dart';
 import 'scan/scan_view.dart';
 import 'foodhub/foodhub_view.dart';
+import 'profile/profile_view.dart';
+import 'package:food_link/utils/constants/colors.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'login_page.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -20,9 +24,8 @@ class _MainScreenState extends State<MainScreen> {
     HomePage(),
     InventoryPage(),
     ScanPage(),
-    // NotificationsPage(),
-    // FavoritesPage(),
     FoodHubPage(),
+    // NotificationsPage(),
     RecipePage(),
   ];
 
@@ -48,8 +51,8 @@ class _MainScreenState extends State<MainScreen> {
       selectedColor: Colors.green,
     ),
     SalomonBottomBarItem(
-      icon: const Icon(Icons.person),
-      title: const Text("Profile"),
+      icon: const Icon(Icons.food_bank_outlined),
+      title: const Text("Recipes"),
       selectedColor: Colors.green,
     ),
   ];
@@ -58,8 +61,55 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Food Link', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.green,
+        title: const Text('Food Link', style: TextStyle(color: FLColors.white)),
+        backgroundColor: FLColors.primary,
+        actions: [
+          // IconButton(
+          //   icon: const Icon(Icons.notifications, color: FLColors.white),
+          //   onPressed: () {},
+          // ),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.person, color: FLColors.white),
+            onSelected: (String result) async {
+              if (result == 'logout') {
+                await FirebaseAuth.instance.signOut();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginPage()),
+                );
+              }
+            },
+            itemBuilder: (BuildContext context) {
+              return [
+                PopupMenuItem<String>(
+                  value: 'logout',
+                  child: Row(
+                    spacing: 8,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+
+                    children: [
+                      const Icon(Icons.logout, color: Colors.red),
+                      const Text(
+                        'Logout',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ];
+            },
+            offset: Offset(0, 40),
+            color: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ],
       ),
       body: _pages[_currentIndex],
       bottomNavigationBar: Container(
