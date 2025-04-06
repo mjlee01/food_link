@@ -70,7 +70,6 @@ class _InventoryPageState extends State<InventoryPage>
                         Text("Category: ${data['category']}"),
                         Text("Expiration Date: $formattedExpiry"),
                         Text("Quantity: ${data['quantity']} ${data['unit']}"),
-                        Text("Storage Location: ${data['location']}"),
                         Text("Date Added: $formattedAddedDate"),
                         Text("Notes: ${data['note'] ?? '—'}"),
                       ]
@@ -90,25 +89,25 @@ class _InventoryPageState extends State<InventoryPage>
               mainAxisSize: MainAxisSize.max,
               spacing: 5,
               children: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      side: BorderSide(color: FLColors.info, width: 1),
-                    ),
-                  ),
-                  child: Row(
-                    spacing: 2,
-                    children: [
-                      Icon(Icons.share, color: FLColors.info, size: 16),
-                      Text(
-                        "Share",
-                        style: TextStyle(color: FLColors.info, fontSize: 16),
-                      ),
-                    ],
-                  ),
-                ),
+                // TextButton(
+                //   onPressed: () => Navigator.of(context).pop(),
+                //   style: TextButton.styleFrom(
+                //     shape: RoundedRectangleBorder(
+                //       borderRadius: BorderRadius.circular(8),
+                //       side: BorderSide(color: FLColors.info, width: 1),
+                //     ),
+                //   ),
+                //   child: Row(
+                //     spacing: 2,
+                //     children: [
+                //       Icon(Icons.share, color: FLColors.info, size: 16),
+                //       Text(
+                //         "Share",
+                //         style: TextStyle(color: FLColors.info, fontSize: 16),
+                //       ),
+                //     ],
+                //   ),
+                // ),
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
