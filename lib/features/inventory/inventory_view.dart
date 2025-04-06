@@ -21,6 +21,7 @@ class _InventoryPageState extends State<InventoryPage>
   void showGroceryDetailsDialog(
     BuildContext context,
     Map<String, dynamic> data,
+    DocumentSnapshot doc,
   ) {
     DateTime expiryDate = (data['expiry_date'] as Timestamp).toDate();
     String formattedExpiry = DateFormat.yMMMMd().format(expiryDate);
@@ -138,7 +139,60 @@ class _InventoryPageState extends State<InventoryPage>
                 ),
                 TextButton(
                   onPressed: () {
-                    Navigator.of(context).pop();
+                    final outerContext = context; 
+                    showDialog(
+                      context: outerContext,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text('Delete Confirmation'),
+                          content: Text(
+                            'Are you sure you want to delete "${data['name']}"?',
+                          ),
+                          actions: [
+                            TextButton(
+                              style: ButtonStyle(
+                                shape: WidgetStateProperty.resolveWith(
+                                  (context) => RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                    side: BorderSide(color: FLColors.darkGrey),
+                                  ),
+                                ),
+                              ),
+                              child: Text('Cancel'),
+                              onPressed: () => Navigator.of(context).pop(),
+                            ),
+                            TextButton(
+                              style: ButtonStyle(
+                                backgroundColor: WidgetStateColor.resolveWith(
+                                  (context) => FLColors.error,
+                                ),
+                              ),
+                              child: Text(
+                                'Delete',
+                                style: TextStyle(color: FLColors.textWhite),
+                              ),
+                              onPressed: () async {
+                                Navigator.of(context).pop();
+                                Navigator.of(context).pop();
+                                await FirebaseFirestore.instance
+                                    .collection('groceries')
+                                    .doc(doc.id)
+                                    .delete();
+                                ScaffoldMessenger.of(outerContext).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      '${data['name']} record is deleted successfully',
+                                    ),
+                                    backgroundColor: FLColors.primary,
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
                   },
                   style: TextButton.styleFrom(
                     shape: RoundedRectangleBorder(
@@ -286,7 +340,11 @@ class _InventoryPageState extends State<InventoryPage>
                                   ),
                                   child: ListTile(
                                     onTap: () {
-                                      showGroceryDetailsDialog(context, data);
+                                      showGroceryDetailsDialog(
+                                        context,
+                                        data,
+                                        doc,
+                                      );
                                     },
                                     title: Text(
                                       data['name'],
