@@ -23,7 +23,7 @@ class _MainScreenState extends State<MainScreen> {
     // NotificationsPage(),
     // FavoritesPage(),
     FoodHubPage(),
-    ProfilePage(),
+    RecipePage(),
   ];
 
   final _navBarItems = [

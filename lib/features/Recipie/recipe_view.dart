@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
-import 'ingredient_select.dart';  // Make sure this import path is correct
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:food_link/features/Recipie/ingredient_select.dart';
+import 'package:food_link/features/Recipie/recipe_display_view.dart';
+import 'package:food_link/features/Recipie/recipe_model.dart';
 
-class RecipePage extends StatelessWidget {
+class RecipePage extends StatefulWidget {
   const RecipePage({super.key});
 
-  // Sample recipe data - replace with your actual data
-  final List<Map<String, dynamic>> recipes = const [
-    {'name': 'Vegetable Stir Fry', 'date': '2023-10-15'},
-    {'name': 'Chicken Curry', 'date': '2023-10-10'},
-    {'name': 'Pasta Carbonara', 'date': '2023-10-05'},
-    {'name': 'Avocado Toast', 'date': '2023-09-28'},
-  ];
+  @override
+  State<RecipePage> createState() => _RecipePageState();
+}
+
+class _RecipePageState extends State<RecipePage>
+    with SingleTickerProviderStateMixin {
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -22,37 +25,75 @@ class RecipePage extends StatelessWidget {
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.green),
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: recipes.length,
-        itemBuilder: (context, index) {
-          return Card(
-            elevation: 2,
-            margin: const EdgeInsets.only(bottom: 16),
-            child: ListTile(
-              contentPadding: const EdgeInsets.all(16),
-              title: Text(
-                recipes[index]['name'],
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              subtitle: Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text(
-                  'Created: ${recipes[index]['date']}',
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
+      body: StreamBuilder<QuerySnapshot>(
+        stream: _db.collection('recipe').snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(child: Text('No recipes found'));
+          }
+
+          final recipes =
+              snapshot.data!.docs.map((doc) {
+                return Recipe.fromMap(doc.data() as Map<String, dynamic>);
+              }).toList();
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: recipes.length,
+            itemBuilder: (context, index) {
+              final recipe = recipes[index];
+
+              return Card(
+                elevation: 2,
+                color: Colors.grey[100],
+                margin: const EdgeInsets.only(bottom: 16),
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => RecipeDisplayPage(recipe: recipe),
+                      ),
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          recipe.name,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        if (recipe.ingredient.isNotEmpty)
+                          Text(
+                            recipe.ingredient.join(', '),
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 14,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        const SizedBox(height: 8),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              trailing: const Icon(Icons.chevron_right, color: Colors.green),
-              onTap: () {
-                // Add navigation to recipe detail page if needed
-              },
-            ),
+              );
+            },
           );
         },
       ),
@@ -62,7 +103,9 @@ class RecipePage extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => IngredientSelectPage()),
+            MaterialPageRoute(
+              builder: (context) => const IngredientSelectPage(),
+            ),
           );
         },
       ),

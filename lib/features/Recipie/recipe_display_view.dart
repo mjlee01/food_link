@@ -1,23 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:food_link/data/services/firestore_services.dart';
+import 'package:food_link/features/Recipie/recipe_model.dart';
 
 class RecipeDisplayPage extends StatelessWidget {
-  final String recipeName;
-  final String prepTime;
-  final String cookTime;
-  final String servings;
-  final List<String> ingredients;
-  final List<String> instructions;
-  final String? notes;
+  final Recipe recipe;
+  final bool isNewRecipe; // Add this flag
 
   const RecipeDisplayPage({
     super.key,
-    required this.recipeName,
-    required this.prepTime,
-    required this.cookTime,
-    required this.servings,
-    required this.ingredients,
-    required this.instructions,
-    this.notes,
+    required this.recipe,
+    this.isNewRecipe = false, // Default to false
   });
 
   @override
@@ -26,7 +18,7 @@ class RecipeDisplayPage extends StatelessWidget {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(recipeName),
+          title: Text(recipe.name),
           bottom: const TabBar(
             indicatorColor: Colors.green,
             labelColor: Colors.green,
@@ -38,20 +30,51 @@ class RecipeDisplayPage extends StatelessWidget {
             ],
           ),
         ),
-        body: TabBarView(
+        body: Stack(
           children: [
-            // Overview Tab
-            _buildOverviewTab(),
-
-            // Ingredients Tab
-            _buildIngredientsTab(),
-
-            // Steps Tab
-            _buildInstructionsTab(),
+            TabBarView(
+              children: [
+                _buildOverviewTab(),
+                _buildIngredientsTab(),
+                _buildInstructionsTab(),
+              ],
+            ),
+            // Positioned save button only for new recipes
+            if (isNewRecipe) _buildSaveButton(context),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildSaveButton(BuildContext context) {
+    return Positioned(
+      bottom: 20,
+      right: 20,
+      child: FloatingActionButton(
+        backgroundColor: Colors.green,
+        child: const Icon(Icons.save, color: Colors.white),
+        onPressed: () => _saveRecipe(context),
+      ),
+    );
+  }
+
+  Future<void> _saveRecipe(BuildContext context) async {
+    try {
+      final firestoreService = FirestoreService();
+      await firestoreService.saveRecipe(recipe);
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Recipe saved successfully!')),
+      );
+      
+      // Optional: Navigate back after saving
+      Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error saving recipe: $e')),
+      );
+    }
   }
 
   Widget _buildOverviewTab() {
@@ -74,13 +97,14 @@ class RecipeDisplayPage extends StatelessWidget {
           const SizedBox(height: 24),
           Center(
             child: Text(
-              recipeName,
+              recipe.name,
               style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
           ),
           const SizedBox(height: 32),
           Card(
             elevation: 4,
+            color: Colors.grey[100], 
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
@@ -88,42 +112,41 @@ class RecipeDisplayPage extends StatelessWidget {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  _buildInfoRow(Icons.timer, "Prep Time", prepTime),
+                  _buildInfoRow(Icons.timer, "Prep Time", recipe.prepTime),
                   const Divider(),
-                  _buildInfoRow(Icons.timer_outlined, "Cook Time", cookTime),
+                  _buildInfoRow(Icons.timer_outlined, "Cook Time", recipe.cookTime),
                   const Divider(),
-                  _buildInfoRow(Icons.people, "Servings", servings),
+                  _buildInfoRow(Icons.people, "Servings", recipe.serving.toString()),
                 ],
               ),
             ),
           ),
-          if (notes != null && notes!.isNotEmpty) ...[
-            const SizedBox(height: 24),
-            Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Notes & Serving Suggestions",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: Colors.green,
-                      ),
+          const SizedBox(height: 24),
+          Card(
+            elevation: 4,
+            color: Colors.grey[100], 
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Notes & Serving Suggestions",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Colors.green,
                     ),
-                    const SizedBox(height: 8),
-                    Text(notes!, style: const TextStyle(fontSize: 16)),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(recipe.note, style: const TextStyle(fontSize: 16)),
+                ],
               ),
             ),
-          ],
+          ),
         ],
       ),
     );
@@ -132,10 +155,11 @@ class RecipeDisplayPage extends StatelessWidget {
   Widget _buildIngredientsTab() {
     return ListView.builder(
       padding: const EdgeInsets.all(16.0),
-      itemCount: ingredients.length,
+      itemCount: recipe.ingredient.length,
       itemBuilder: (context, index) {
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 4),
+          color: Colors.grey[100], 
           child: Padding(
             padding: const EdgeInsets.all(12.0),
             child: Row(
@@ -144,7 +168,7 @@ class RecipeDisplayPage extends StatelessWidget {
                 const SizedBox(width: 16),
                 Expanded(
                   child: Text(
-                    ingredients[index],
+                    recipe.ingredient[index],
                     style: const TextStyle(fontSize: 16),
                   ),
                 ),
@@ -157,40 +181,39 @@ class RecipeDisplayPage extends StatelessWidget {
   }
 
   Widget _buildInstructionsTab() {
-  return ListView.builder(
-    padding: const EdgeInsets.all(16.0),
-    itemCount: instructions.length,
-    itemBuilder: (context, index) {
-      // Remove any existing numbering from the instruction text
-      final instructionText = instructions[index].replaceAll(RegExp(r'^\d+\.\s*'), '');
-      
-      return Card(
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Step ${index + 1}",
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  color: Colors.green,
+    return ListView.builder(
+      padding: const EdgeInsets.all(16.0),
+      itemCount: recipe.instruction.length,
+      itemBuilder: (context, index) {
+        final instructionText = recipe.instruction[index].replaceAll(RegExp(r'^\d+\.\s*'), '');
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          color: Colors.grey[100], 
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Step ${index + 1}",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    color: Colors.green,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                instructionText, // Use the cleaned text
-                style: const TextStyle(fontSize: 16),
-              ),
-            ],
+                const SizedBox(height: 8),
+                Text(
+                  instructionText,
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ],
+            ),
           ),
-        ),
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
 
   Widget _buildInfoRow(IconData icon, String label, String value) {
     return Padding(
