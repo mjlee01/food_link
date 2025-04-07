@@ -442,8 +442,7 @@ class _ScanPageState extends State<ScanPage>
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          "Prediction: $_predictionLabel"
-                          "Confidence: ${(_predictionConfidence! * 100).toStringAsFixed(2)}%"
+                          //"Prediction: $_predictionLabel"
                           "Position your grocery item within the frame and tap capture",
                           style: Theme.of(context).textTheme.bodyLarge
                               ?.copyWith(color: FLColors.textWhite),
