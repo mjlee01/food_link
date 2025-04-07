@@ -28,6 +28,9 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  tflite_flutter: ^0.11.0
+  image: ^3.0.1
+  path_provider: ^2.0.11
   flutter:
     sdk: flutter
 
@@ -79,6 +82,8 @@ flutter:
   assets:
     - assets/images/
     - assets/logos/
+    - assets/model.tflite
+    - assets/labels.txt
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
