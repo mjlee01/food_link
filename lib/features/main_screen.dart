@@ -5,7 +5,6 @@ import 'home/home_view.dart';
 import 'inventory/inventory_view.dart';
 import 'scan/scan_view.dart';
 import 'foodhub/foodhub_view.dart';
-import 'profile/profile_view.dart';
 import 'package:food_link/utils/constants/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'login_page.dart';
@@ -90,11 +89,11 @@ class _MainScreenState extends State<MainScreen> {
                     mainAxisSize: MainAxisSize.min,
 
                     children: [
-                      const Icon(Icons.logout, color: Colors.red),
+                      const Icon(Icons.logout, color: FLColors.error),
                       const Text(
                         'Logout',
                         style: TextStyle(
-                          color: Colors.red,
+                          color: FLColors.error,
                           fontWeight: FontWeight.w700,
                         ),
                       ),

@@ -121,41 +121,44 @@ class _LoginPageState extends State<LoginPage>
                 CrossAxisAlignment.center, // Centers content horizontally
             children: [
               // Logo and Tagline
-              Column(
-                children: [
-                  Row(
-                    mainAxisAlignment:
-                        MainAxisAlignment.center, // Center the row horizontally
-                    children: [
-                      // Icon
-                      FaIcon(
-                        FontAwesomeIcons
-                            .seedling, // Replace with your desired icon
-                        color: Colors.green, // Icon color
-                        size: 32, // Icon size
-                      ),
-                      SizedBox(
-                        width: 8,
-                      ), // Add spacing between the icon and the text
-                      // Text
-                      Text(
-                        "FoodLink",
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
+              Padding(
+                padding: const EdgeInsets.only(top: 50.0),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment:
+                          MainAxisAlignment.center, // Center the row horizontally
+                      children: [
+                        // Icon
+                        FaIcon(
+                          FontAwesomeIcons
+                              .seedling, // Replace with your desired icon
+                          color: Colors.green, // Icon color
+                          size: 32, // Icon size
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 8), // Add spacing below the row
-                  Text(
-                    "Reduce waste. Share food. Build community.",
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
-                  ),
-                ],
+                        SizedBox(
+                          width: 8,
+                        ), // Add spacing between the icon and the text
+                        // Text
+                        Text(
+                          "FoodLink",
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8), // Add spacing below the row
+                    Text(
+                      "Reduce waste. Share food. Build community.",
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                  ],
+                ),
               ),
-              SizedBox(height: 24),
+              SizedBox(height: 4),
 
               // TabBar for Sign In and Sign Up
               TabBar(
@@ -218,188 +221,205 @@ class _LoginPageState extends State<LoginPage>
   }
 
   Widget _buildSignInForm() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Email Field
-        Text(
-          "Email",
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 4),
-        TextField(
-          controller: emailController,
-          decoration: InputDecoration(
-            labelText: 'Email',
-            hintText: 'Enter your email',
-            border: OutlineInputBorder(),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Email Field
+          Text(
+            "Email",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
-          keyboardType: TextInputType.emailAddress,
-        ),
-        SizedBox(height: 16),
-
-        // Password Field
-        Text(
-          "Password",
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 4),
-        TextField(
-          controller: passwordController,
-          decoration: InputDecoration(
-            labelText: 'Password',
-            hintText: 'Enter your password',
-            border: OutlineInputBorder(),
-          ),
-          obscureText: true,
-        ),
-        SizedBox(height: 16),
-
-        // Remember Me Checkbox
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                Checkbox(
-                  value: rememberMe,
-                  onChanged: (value) {
-                    setState(() {
-                      rememberMe = value!;
-                    });
-                  },
-                ),
-                Text("Remember Me"),
-              ],
+          SizedBox(height: 4),
+          TextField(
+            controller: emailController,
+            decoration: InputDecoration(
+              labelText: 'Email',
+              hintText: 'Enter your email',
+              border: OutlineInputBorder(),
             ),
-            TextButton(
+            keyboardType: TextInputType.emailAddress,
+          ),
+          SizedBox(height: 16),
+      
+          // Password Field
+          Text(
+            "Password",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 4),
+          TextField(
+            controller: passwordController,
+            decoration: InputDecoration(
+              labelText: 'Password',
+              hintText: 'Enter your password',
+              border: OutlineInputBorder(),
+            ),
+            obscureText: true,
+          ),
+          SizedBox(height: 16),
+      
+          // Remember Me Checkbox
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Checkbox(
+                    value: rememberMe,
+                    onChanged: (value) {
+                      setState(() {
+                        rememberMe = value!;
+                      });
+                    },
+                  ),
+                  Text("Remember Me"),
+                ],
+              ),
+              TextButton(
+                onPressed: () {
+                  // Handle forgot password
+                },
+                child: Text("Forgot Password?"),
+              ),
+            ],
+          ),
+      
+          // Sign In Button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
               onPressed: () {
-                // Handle forgot password
+                _signInWithEmailAndPassword();
               },
-              child: Text("Forgot Password?"),
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                backgroundColor: Colors.green,
+              ),
+              child: Text("Sign In", style: TextStyle(fontSize: 16)),
             ),
-          ],
-        ),
-
-        // Sign In Button
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () {
-              _signInWithEmailAndPassword();
-            },
-            style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              backgroundColor: Colors.green,
-            ),
-            child: Text("Sign In", style: TextStyle(fontSize: 16)),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildSignUpForm() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "Full Name",
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 4),
-        // Full Name Field
-        TextField(
-          controller: fullNameController,
-          decoration: InputDecoration(
-            labelText: 'Full Name',
-            hintText: 'Enter your full name',
-            border: OutlineInputBorder(),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Full Name",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
-        ),
-        SizedBox(height: 16),
-
-        // Email Field
-        Text(
-          "Email",
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 4),
-        TextField(
-          controller: emailController,
-          decoration: InputDecoration(
-            labelText: 'Email',
-            hintText: 'Enter your email',
-            border: OutlineInputBorder(),
+          SizedBox(height: 4),
+          // Full Name Field
+          TextField(
+            controller: fullNameController,
+            decoration: InputDecoration(
+              labelText: 'Full Name',
+              hintText: 'Enter your full name',
+              border: OutlineInputBorder(),
+            ),
           ),
-          keyboardType: TextInputType.emailAddress,
-        ),
-        SizedBox(height: 16),
-
-        // Password Field
-        Text(
-          "Password",
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 4),
-        TextField(
-          controller: passwordController,
-          decoration: InputDecoration(
-            labelText: 'Password',
-            hintText: 'Create a password',
-            border: OutlineInputBorder(),
+          SizedBox(height: 16),
+      
+          // Email Field
+          Text(
+            "Email",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
-          obscureText: true,
-        ),
-        SizedBox(height: 16),
-
-        // Confirm Password Field
-        Text(
-          "Confirm Password",
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 4),
-        TextField(
-          controller: confirmPasswordController,
-          decoration: InputDecoration(
-            labelText: 'Confirm Password',
-            hintText: 'Re-enter your password',
-            border: OutlineInputBorder(),
+          SizedBox(height: 4),
+          TextField(
+            controller: emailController,
+            decoration: InputDecoration(
+              labelText: 'Email',
+              hintText: 'Enter your email',
+              border: OutlineInputBorder(),
+            ),
+            keyboardType: TextInputType.emailAddress,
           ),
-          obscureText: true,
-        ),
-        SizedBox(height: 16),
-
-        // Agree to Terms Checkbox
-        Row(
-          children: [
-            Checkbox(
-              value: agreeToTerms,
-              onChanged: (value) {
-                setState(() {
-                  agreeToTerms = value!;
-                });
+          SizedBox(height: 16),
+      
+          // Password Field
+          Text(
+            "Password",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 4),
+          TextField(
+            controller: passwordController,
+            decoration: InputDecoration(
+              labelText: 'Password',
+              hintText: 'Create a password',
+              border: OutlineInputBorder(),
+            ),
+            obscureText: true,
+          ),
+          SizedBox(height: 16),
+      
+          // Confirm Password Field
+          Text(
+            "Confirm Password",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 4),
+          TextField(
+            controller: confirmPasswordController,
+            decoration: InputDecoration(
+              labelText: 'Confirm Password',
+              hintText: 'Re-enter your password',
+              border: OutlineInputBorder(),
+            ),
+            obscureText: true,
+          ),
+          SizedBox(height: 8),
+      
+          // Agree to Terms Checkbox
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Checkbox(
+                value: agreeToTerms,
+                onChanged: (value) {
+                  setState(() {
+                    agreeToTerms = value!;
+                  });
+                },
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    "I agree to the Terms of Service and Privacy Policy",
+                    softWrap: true,
+                    style: TextStyle(fontSize: 14),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12),
+      
+          // Sign Up Button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                _registerWithEmailAndPassword();
               },
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                backgroundColor: Colors.green,
+              ),
+              child: Text("Create Account", style: TextStyle(fontSize: 16)),
             ),
-            Text("I agree to the Terms of Service and Privacy Policy"),
-          ],
-        ),
-
-        // Sign Up Button
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () {
-              _registerWithEmailAndPassword();
-            },
-            style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              backgroundColor: Colors.green,
-            ),
-            child: Text("Create Account", style: TextStyle(fontSize: 16)),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
