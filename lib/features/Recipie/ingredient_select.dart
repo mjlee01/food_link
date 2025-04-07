@@ -6,39 +6,28 @@ import 'generate_recipe.dart';
 import 'recipe_display_view.dart';
 
 class IngredientSelectPage extends StatefulWidget {
-  const IngredientSelectPage({super.key});
+  final List<String> initialIngredient;
+
+  const IngredientSelectPage({super.key, this.initialIngredient = const []});
 
   @override
   State<IngredientSelectPage> createState() => _IngredientSelectPageState();
 }
 
 class _IngredientSelectPageState extends State<IngredientSelectPage> {
-  // final List<String> allIngredients = [
-  //   'Apples',
-  //   'Bananas',
-  //   'Carrots',     // delete this later
-  //   'Chicken',     // delete this later
-  //   'Eggs',          // delete this later
-  //   'Flour',       // delete this later
-  //   'Garlic',      // delete this later
-  //   'Milk',        // delete this later
-  //   'Onions',
-  //   'Potatoes',
-  //   'Rice',
-  //   'Tomatoes',
-  //   'Bread',
-  //   'Orange',
-  //   'Butter',
-  //   'Honey',
-  // ];
-
   final FirebaseFirestore _db = FirebaseFirestore.instance;
-
   late Recipe recipeData;
-  final List<String> selectedIngredients = [];
+  late List<String> selectedIngredients; // Change from final to late
   bool isLoading = false;
 
   @override
+  void initState() {
+    super.initState();
+    selectedIngredients = List.from(
+      widget.initialIngredient,
+    ); // Initialize with passed ingredients
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Select Ingredients')),
@@ -59,7 +48,9 @@ class _IngredientSelectPageState extends State<IngredientSelectPage> {
 
           final ingredients =
               snapshot.data!.docs.map((doc) {
-                return InventoryItem.fromMap(doc.data() as Map<String, dynamic>);
+                return InventoryItem.fromMap(
+                  doc.data() as Map<String, dynamic>,
+                );
               }).toList();
 
           return Column(
