@@ -1,0 +1,9 @@
+0 Banana - Green
+1 Banana - Semiripe
+2 Banana - Ripe
+3 Banana - Overripe
+4 Avocado - Underripe
+5 Avocado - Breaking
+6 Avocado - Ripe_1
+7 Avocado - Ripe_2
+8 Avocado_Overripe

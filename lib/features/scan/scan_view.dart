@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:image_picker/image_picker.dart';
@@ -7,6 +9,10 @@ import 'package:food_link/features/main_screen.dart';
 import 'dart:collection';
 import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
+
+import 'package:tflite_flutter/tflite_flutter.dart';
+import 'package:image/image.dart' as img;
+import 'dart:typed_data';
 
 class ScanPage extends StatefulWidget {
   const ScanPage({super.key});
@@ -46,6 +52,7 @@ enum GroceryType {
         ),
       );
 }
+
 enum GroceryUnit {
   piece('Piece(s)', FontAwesomeIcons.percent),
   box('Box', FontAwesomeIcons.boxesStacked),
@@ -77,6 +84,10 @@ enum GroceryUnit {
 
 class _ScanPageState extends State<ScanPage>
     with SingleTickerProviderStateMixin {
+  String? _predictionLabel;
+  double? _predictionConfidence;
+  late Interpreter _interpreter;
+
   late TabController _tabController;
   final _tabs = [const Tab(text: "Camera"), const Tab(text: "Manual")];
 
@@ -94,10 +105,12 @@ class _ScanPageState extends State<ScanPage>
 
   final FocusNode _dropdownFocusNode = FocusNode();
   bool buttonColor = false;
+  bool _isCapturing = false; // Add this state variable
 
   @override
   void initState() {
     super.initState();
+    _loadModel();
     _tabController = TabController(length: 2, vsync: this);
     _initializeCamera();
     _dropdownFocusNode.addListener(() {
@@ -113,6 +126,79 @@ class _ScanPageState extends State<ScanPage>
   void dispose() {
     super.dispose();
     _tabController.dispose();
+    _interpreter.close();
+  }
+
+  Float32List imageToTensor(img.Image image) {
+    final Float32List tensor = Float32List(1 * 224 * 224 * 3);
+    int index = 0;
+
+    for (int y = 0; y < 224; y++) {
+      for (int x = 0; x < 224; x++) {
+        final pixel = image.getPixel(x, y);
+        tensor[index++] = img.getRed(pixel) / 255.0;
+        tensor[index++] = img.getGreen(pixel) / 255.0;
+        tensor[index++] = img.getBlue(pixel) / 255.0;
+      }
+    }
+
+    return tensor;
+  }
+
+  Future<void> _loadModel() async {
+    try {
+      // Load the model from the assets
+      _interpreter = await Interpreter.fromAsset('assets/model.tflite');
+
+      debugPrint("Model loaded successfully!");
+    } catch (e) {
+      debugPrint("Error loading model: $e");
+    }
+  }
+
+  Future<void> _predictImage(File image) async {
+    try {
+      // Read image
+      final imageBytes = await image.readAsBytes();
+      final img.Image? imageTemp = img.decodeImage(imageBytes);
+
+      if (imageTemp == null) {
+        debugPrint("Error decoding image");
+        return;
+      }
+
+      // Resize
+      final img.Image resizedImage = img.copyResize(
+        imageTemp,
+        width: 224,
+        height: 224,
+      );
+
+      // Convert to tensor
+      final input = imageToTensor(resizedImage);
+
+      // Prepare output buffer (adjust size based on model)
+      final output = List.filled(
+        1 * 9,
+        0.0,
+      ).reshape([1, 9]); // Example for classification
+
+      // Run inference
+      _interpreter.run(input.buffer.asUint8List(), output);
+
+      // Process output
+      final confidences = output[0] as List<double>;
+      final maxIndex = confidences.indexWhere(
+        (v) => v == confidences.reduce((a, b) => a > b ? a : b),
+      );
+
+      setState(() {
+        _predictionLabel = "Class: $maxIndex";
+        _predictionConfidence = confidences[maxIndex];
+      });
+    } catch (e) {
+      debugPrint("Error during image prediction: $e");
+    }
   }
 
   Future<void> _initializeCamera() async {
@@ -145,17 +231,43 @@ class _ScanPageState extends State<ScanPage>
   }
 
   Future<void> _capturePhoto() async {
-    if (_cameraController == null || !_cameraController!.value.isInitialized) {
-      return;
+    try {
+      if (_cameraController == null ||
+          !_cameraController!.value.isInitialized) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Camera is not initialized")),
+        );
+        return;
+      }
+
+      // Show loading indicator
+      setState(() {
+        _isCapturing = true; // Add this state variable
+      });
+
+      final XFile photo = await _cameraController!.takePicture();
+      final imageFile = File(photo.path);
+
+      if (!mounted) return;
+
+      // Process the image
+      await _predictImage(imageFile);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Photo captured successfully")),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error capturing photo: $e")));
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCapturing = false;
+        });
+      }
     }
-
-    final XFile photo = await _cameraController!.takePicture();
-
-    if (!mounted) return;
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Photo captured: ${photo.path}")),
-    );
   }
 
   void _flipCamera() {
@@ -172,13 +284,15 @@ class _ScanPageState extends State<ScanPage>
     // For example, using image_picker package
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-    
+    final imageFile = File(image!.path);
+
     if (!mounted) return;
-    
+
     if (image != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Image selected: ${image.path}")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Image selected: ${image.path}")));
+      await _predictImage(imageFile);
     }
   }
 
@@ -271,14 +385,32 @@ class _ScanPageState extends State<ScanPage>
                       borderRadius: BorderRadius.circular(
                         10,
                       ), // Maintain rounded corners
-                      child: OverflowBox(
-                        alignment: Alignment.center,
-                        minWidth: 0,
-                        maxWidth: 350, // Fixed width
-                        minHeight: 0,
-                        maxHeight:
-                            double.infinity, // Allow extra content to overflow
-                        child: CameraPreview(_cameraController!),
+                      child: Stack(
+                        children: [
+                          OverflowBox(
+                            alignment: Alignment.center,
+                            minWidth: 0,
+                            maxWidth: 350,
+                            minHeight: 0,
+                            maxHeight: double.infinity,
+                            child:
+                                _cameraController != null &&
+                                        _cameraController!.value.isInitialized
+                                    ? CameraPreview(_cameraController!)
+                                    : const Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                          ),
+                          if (_isCapturing)
+                            Container(
+                              color: Colors.black54,
+                              child: const Center(
+                                child: CircularProgressIndicator(
+                                  color: FLColors.white,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   ),
@@ -310,11 +442,34 @@ class _ScanPageState extends State<ScanPage>
                         ),
                         const SizedBox(height: 10),
                         Text(
+                          "Prediction: $_predictionLabel"
+                          "Confidence: ${(_predictionConfidence! * 100).toStringAsFixed(2)}%"
                           "Position your grocery item within the frame and tap capture",
                           style: Theme.of(context).textTheme.bodyLarge
                               ?.copyWith(color: FLColors.textWhite),
                           textAlign: TextAlign.center,
                         ),
+                        // ⬇️ ADD HERE
+                        if (_predictionLabel != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 10),
+                            child: Column(
+                              children: [
+                                Text(
+                                  "Prediction: $_predictionLabel",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                if (_predictionConfidence != null)
+                                  Text(
+                                    "Confidence: ${(_predictionConfidence! * 100).toStringAsFixed(2)}%",
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                              ],
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -503,9 +658,9 @@ class _ScanPageState extends State<ScanPage>
                               buttonColor ? FLColors.black : Colors.grey[300],
                         ),
                         Text(
-                          _dateController.text.isNotEmpty 
-                            ? _dateController.text 
-                            : "Pick an Expiry Date",
+                          _dateController.text.isNotEmpty
+                              ? _dateController.text
+                              : "Pick an Expiry Date",
                           style: TextStyle(fontWeight: FontWeight.normal),
                         ),
                       ],
@@ -587,23 +742,23 @@ class _ScanPageState extends State<ScanPage>
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
-                  onPressed: () {
-                    _selectFromGallery();
-                    setState(() {
-                      buttonColor = false;
-                    });
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    spacing: 10,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(FontAwesomeIcons.plus, color: FLColors.white),
-                      Text("Add to Inventory"),
-                    ],
+                    onPressed: () {
+                      _selectFromGallery();
+                      setState(() {
+                        buttonColor = false;
+                      });
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      spacing: 10,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(FontAwesomeIcons.plus, color: FLColors.white),
+                        Text("Add to Inventory"),
+                      ],
+                    ),
                   ),
-                ),
                 ],
               ),
             ],
