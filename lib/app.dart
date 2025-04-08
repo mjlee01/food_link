@@ -46,7 +46,7 @@ class _FoodLinkState extends State<FoodLink> {
       themeMode: ThemeMode.system,
       theme: FLAppTheme.lightTheme,
       darkTheme: FLAppTheme.darkTheme, 
-      // debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner: false, 
       home:
           _isLoading
               ? Scaffold(body: Center(child: CircularProgressIndicator()))

@@ -249,7 +249,7 @@ class FoodHubState extends State<FoodHubPage> {
       final currentLocationMarker = Marker(
         markerId: const MarkerId('current_location'),
         position: _initialPosition!,
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
         infoWindow: const InfoWindow(
           title: 'Your Location',
           snippet: 'This is your current location.',
@@ -515,7 +515,7 @@ class FoodHubState extends State<FoodHubPage> {
                   color: Colors.black,
                   constraints: const BoxConstraints(
                     minHeight: 40,
-                    minWidth: 187,
+                    minWidth: 170,
                   ),
                   children: const [
                     Text("Available Items"),
@@ -1174,6 +1174,10 @@ class MySharedFoodItemCard extends StatelessWidget {
                         );
                       },
                       style: ElevatedButton.styleFrom(
+                        side: const BorderSide(
+                          color: Colors.amber,
+                          width: 1,
+                        ),
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         backgroundColor: Colors.amber,
                       ),
@@ -1193,6 +1197,10 @@ class MySharedFoodItemCard extends StatelessWidget {
                         );
                       },
                       style: ElevatedButton.styleFrom(
+                        side: const BorderSide(
+                          color: Colors.red,
+                          width: 1,
+                        ),
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         backgroundColor: Colors.red,
                       ),
