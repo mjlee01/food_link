@@ -42,7 +42,7 @@ class _RecipePageState extends State<RecipePage>
 
           final recipes =
               snapshot.data!.docs.map((doc) {
-                return Recipe.fromMap(doc.data() as Map<String, dynamic>);
+                return Recipe.fromMap(doc.id, doc.data() as Map<String, dynamic>);
               }).toList();
 
           return ListView.builder(

@@ -7,13 +7,15 @@ class FirestoreService {
 
   Stream<List<InventoryItem>> getGroceryItems() {
     return _db.collection('groceries').snapshots().map((snapshot) {
-      return snapshot.docs.map((doc) => InventoryItem.fromMap(doc.data())).toList();
+      return snapshot.docs
+          .map((doc) => InventoryItem.fromMap(doc.data()))
+          .toList();
     });
   }
 
   Stream<List<Recipe>> getRecipes() {
     return _db.collection('recipe').snapshots().map((snapshot) {
-      return snapshot.docs.map((doc) => Recipe.fromMap(doc.data())).toList();
+      return snapshot.docs.map((doc) => Recipe.fromMap(doc.id, doc.data())).toList();
     });
   }
 
@@ -27,5 +29,12 @@ class FirestoreService {
       'instruction': recipe.instruction,
       'note': recipe.note,
     });
+  }
+
+  Future<void> deleteRecipe(String recipeId) async {
+    await FirebaseFirestore.instance
+        .collection('recipe')
+        .doc(recipeId)
+        .delete();
   }
 }

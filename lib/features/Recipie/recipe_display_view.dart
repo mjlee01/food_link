@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:food_link/data/services/firestore_services.dart';
 import 'package:food_link/features/Recipie/recipe_model.dart';
+import 'package:food_link/utils/constants/colors.dart';
 
 class RecipeDisplayPage extends StatelessWidget {
   final Recipe recipe;
@@ -19,6 +20,13 @@ class RecipeDisplayPage extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: Text(recipe.name),
+          actions: [
+            if (!isNewRecipe) // Only show delete button when recipe is loaded
+              IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red),
+                onPressed: () => _showDeleteConfirmation(context),
+              ),
+          ],
           bottom: const TabBar(
             indicatorColor: Colors.green,
             labelColor: Colors.green,
@@ -47,6 +55,61 @@ class RecipeDisplayPage extends StatelessWidget {
     );
   }
 
+  Future<void> _showDeleteConfirmation(BuildContext context) async {
+    return showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Delete Recipe'),
+            content: Text('Are you sure you want to delete "${recipe.name}"?'),
+            actions: [
+              TextButton(
+                style: ButtonStyle(
+                  shape: WidgetStateProperty.resolveWith(
+                    (context) => RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      side: BorderSide(color: FLColors.darkGrey),
+                    ),
+                  ),
+                ),
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                style: ButtonStyle(
+                  backgroundColor: WidgetStateColor.resolveWith(
+                    (context) => FLColors.error,
+                  ),
+                ),
+                onPressed: () async {
+                  Navigator.pop(context); // Close the dialog
+                  try {
+                    final firestoreService = FirestoreService();
+                    await firestoreService.deleteRecipe(recipe.id);
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('"${recipe.name}" deleted successfully'),
+                      ),
+                    );
+
+                    Navigator.pop(context); // Go back to previous screen
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error deleting recipe: $e')),
+                    );
+                  }
+                },
+                child: Text(
+                  'Delete',
+                  style: TextStyle(color: FLColors.textWhite),
+                ),
+              ),
+            ],
+          ),
+    );
+  }
+
   Widget _buildSaveButton(BuildContext context) {
     return Positioned(
       bottom: 20,
@@ -63,17 +126,19 @@ class RecipeDisplayPage extends StatelessWidget {
     try {
       final firestoreService = FirestoreService();
       await firestoreService.saveRecipe(recipe);
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Recipe saved successfully!')),
       );
-      
-      // Optional: Navigate back after saving
-      Navigator.pop(context);
+
+      // go back 2 pages
+      Navigator.of(context)
+      ..pop() // pop recipe details page
+      ..pop(); // pop ingredient select page
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error saving recipe: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error saving recipe: $e')));
     }
   }
 
@@ -104,7 +169,7 @@ class RecipeDisplayPage extends StatelessWidget {
           const SizedBox(height: 32),
           Card(
             elevation: 4,
-            color: Colors.grey[100], 
+            color: Colors.grey[100],
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
@@ -114,9 +179,17 @@ class RecipeDisplayPage extends StatelessWidget {
                 children: [
                   _buildInfoRow(Icons.timer, "Prep Time", recipe.prepTime),
                   const Divider(),
-                  _buildInfoRow(Icons.timer_outlined, "Cook Time", recipe.cookTime),
+                  _buildInfoRow(
+                    Icons.timer_outlined,
+                    "Cook Time",
+                    recipe.cookTime,
+                  ),
                   const Divider(),
-                  _buildInfoRow(Icons.people, "Servings", recipe.serving.toString()),
+                  _buildInfoRow(
+                    Icons.people,
+                    "Servings",
+                    recipe.serving.toString(),
+                  ),
                 ],
               ),
             ),
@@ -124,7 +197,7 @@ class RecipeDisplayPage extends StatelessWidget {
           const SizedBox(height: 24),
           Card(
             elevation: 4,
-            color: Colors.grey[100], 
+            color: Colors.grey[100],
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
@@ -159,7 +232,7 @@ class RecipeDisplayPage extends StatelessWidget {
       itemBuilder: (context, index) {
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 4),
-          color: Colors.grey[100], 
+          color: Colors.grey[100],
           child: Padding(
             padding: const EdgeInsets.all(12.0),
             child: Row(
@@ -185,10 +258,13 @@ class RecipeDisplayPage extends StatelessWidget {
       padding: const EdgeInsets.all(16.0),
       itemCount: recipe.instruction.length,
       itemBuilder: (context, index) {
-        final instructionText = recipe.instruction[index].replaceAll(RegExp(r'^\d+\.\s*'), '');
+        final instructionText = recipe.instruction[index].replaceAll(
+          RegExp(r'^\d+\.\s*'),
+          '',
+        );
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 8),
-          color: Colors.grey[100], 
+          color: Colors.grey[100],
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -203,10 +279,7 @@ class RecipeDisplayPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  instructionText,
-                  style: const TextStyle(fontSize: 16),
-                ),
+                Text(instructionText, style: const TextStyle(fontSize: 16)),
               ],
             ),
           ),

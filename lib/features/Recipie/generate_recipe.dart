@@ -50,7 +50,7 @@ class RecipieGenerator {
       final jsonMap = _parseRecipeResponse(rawResponse);
       if (jsonMap == null) return null;
       
-      return Recipe.fromMap(jsonMap);
+      return Recipe.fromMap('', jsonMap);
     } catch (e) {
       print('Error generating recipe: $e');
       return null;

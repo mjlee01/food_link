@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:food_link/features/Recipie/ingredient_select.dart';
 import 'package:food_link/utils/constants/colors.dart';
 import 'package:intl/intl.dart';
 
@@ -116,7 +117,15 @@ class _InventoryPageState extends State<InventoryPage>
                 // ),
                 TextButton(
                   onPressed: () {
-                    Navigator.of(context).pop();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) => IngredientSelectPage(
+                              initialIngredient: [data['name']],
+                            ),
+                      ),
+                    );
                   },
                   style: TextButton.styleFrom(
                     shape: RoundedRectangleBorder(
