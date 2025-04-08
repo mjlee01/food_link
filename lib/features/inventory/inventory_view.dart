@@ -18,6 +18,11 @@ class _InventoryPageState extends State<InventoryPage>
 
   final TextEditingController _searchController = TextEditingController();
   String _searchTerm = '';
+  DateTimeRange selectedDateRange = DateTimeRange(
+    start: DateTime(1900),
+    end: DateTime(2100),
+  );
+  bool isDateRangeSelected = false;
 
   void showGroceryDetailsDialog(
     BuildContext context,
@@ -96,25 +101,6 @@ class _InventoryPageState extends State<InventoryPage>
               mainAxisSize: MainAxisSize.max,
               spacing: 5,
               children: [
-                // TextButton(
-                //   onPressed: () => Navigator.of(context).pop(),
-                //   style: TextButton.styleFrom(
-                //     shape: RoundedRectangleBorder(
-                //       borderRadius: BorderRadius.circular(8),
-                //       side: BorderSide(color: FLColors.info, width: 1),
-                //     ),
-                //   ),
-                //   child: Row(
-                //     spacing: 2,
-                //     children: [
-                //       Icon(Icons.share, color: FLColors.info, size: 16),
-                //       Text(
-                //         "Share",
-                //         style: TextStyle(color: FLColors.info, fontSize: 16),
-                //       ),
-                //     ],
-                //   ),
-                // ),
                 TextButton(
                   onPressed: () {
                     Navigator.push(
@@ -275,21 +261,172 @@ class _InventoryPageState extends State<InventoryPage>
               horizontal: 16.0,
               vertical: 10.0,
             ),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search grocery by name',
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search grocery by name',
+                      prefixIcon: Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        _searchTerm = value.toLowerCase();
+                      });
+                    },
+                  ),
                 ),
-              ),
-              onChanged: (value) {
-                setState(() {
-                  _searchTerm = value.toLowerCase();
-                });
-              },
+                SizedBox(width: 8),
+                !isDateRangeSelected
+                    ? OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: Size(100, 53),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 4,
+                        ),
+                        side: BorderSide(
+                          color:
+                              isDateRangeSelected
+                                  ? Colors.black
+                                  : Colors.grey.shade300,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.timer,
+                            color:
+                                isDateRangeSelected
+                                    ? Colors.black
+                                    : Colors.grey.shade300,
+                          ),
+                          SizedBox(width: 4),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                "Select a",
+                                style: TextStyle(
+                                  color:
+                                      isDateRangeSelected
+                                          ? Colors.black
+                                          : Colors.grey.shade300,
+                                  fontSize: 12,
+                                ),
+                                textAlign: TextAlign.end,
+                              ),
+                              Text(
+                                "Date Range",
+                                style: TextStyle(
+                                  color:
+                                      isDateRangeSelected
+                                          ? Colors.black
+                                          : Colors.grey.shade300,
+                                  fontSize: 12,
+                                ),
+                                textAlign: TextAlign.end,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      onPressed: () {
+                        setState(() async {
+                          final picked = await showDateRangePicker(
+                            context: context,
+                            firstDate: DateTime(1900),
+                            lastDate: DateTime(2100),
+                          );
+
+                          if (picked != null) {
+                            setState(() {
+                              selectedDateRange = picked;
+                              isDateRangeSelected = true;
+                            });
+                          }
+                        });
+                      },
+                    )
+                    : OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: Size(100, 53),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 4,
+                        ),
+                        side: BorderSide(
+                          color:
+                              isDateRangeSelected
+                                  ? Colors.black
+                                  : Colors.grey.shade300,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.timer_off,
+                            color:
+                                isDateRangeSelected
+                                    ? Colors.black
+                                    : Colors.grey.shade300,
+                          ),
+                          SizedBox(width: 8),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                "${selectedDateRange.start.day}/${selectedDateRange.start.month} ~",
+                                style: TextStyle(
+                                  color:
+                                      isDateRangeSelected
+                                          ? Colors.black
+                                          : Colors.grey.shade300,
+                                  fontSize: 12,
+                                ),
+                                textAlign: TextAlign.end,
+                              ),
+                              Text(
+                                "${selectedDateRange.end.day}/${selectedDateRange.end.month}",
+                                style: TextStyle(
+                                  color:
+                                      isDateRangeSelected
+                                          ? Colors.black
+                                          : Colors.grey.shade300,
+                                  fontSize: 12,
+                                ),
+                                textAlign: TextAlign.end,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          selectedDateRange = DateTimeRange(
+                            start: DateTime(1900),
+                            end: DateTime(2100),
+                          );
+                          isDateRangeSelected = false;
+                        });
+                      },
+                    ),
+              ],
             ),
           ),
           Expanded(
@@ -314,10 +451,26 @@ class _InventoryPageState extends State<InventoryPage>
                   products =
                       products.where((doc) {
                         var data = doc.data() as Map<String, dynamic>;
-                        return data['name'].toString().toLowerCase().contains(
-                          _searchTerm,
-                        );
+                        final nameMatch = data['name']
+                            .toString()
+                            .toLowerCase()
+                            .contains(_searchTerm.toLowerCase());
+
+                        final date =
+                            (data['expiry_date'] as Timestamp).toDate();
+                        final isInDateRange =
+                            (date.isAfter(
+                                  selectedDateRange.start.subtract(
+                                    Duration(days: 1),
+                                  ),
+                                ) &&
+                                date.isBefore(
+                                  selectedDateRange.end.add(Duration(days: 1)),
+                                ));
+
+                        return nameMatch && isInDateRange;
                       }).toList();
+
                   if (products.isNotEmpty) {
                     categoryWidgets.add(
                       Container(
