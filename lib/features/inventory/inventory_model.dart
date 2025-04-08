@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class InventoryItem {
-  String name, category, unit, note;
+  String name, category, unit, note, imageUrl;
   DateTime expiryDate;
   int quantity;
 
@@ -12,6 +12,7 @@ class InventoryItem {
     required this.quantity,
     required this.unit,
     this.note = '',
+    this.imageUrl = '',
   });
 
   factory InventoryItem.fromMap(Map<String, dynamic> data) {
@@ -21,6 +22,8 @@ class InventoryItem {
       expiryDate: (data['expiry_date'] as Timestamp).toDate(),
       quantity: data['quantity'],
       unit: data['unit'],
+      note: data['note'] ?? '',
+      imageUrl: data['image_url'],
     );
   }
 
@@ -33,6 +36,7 @@ class InventoryItem {
       'note': note,
       'quantity': quantity,
       'unit': unit,
+      'image_url': imageUrl,
     };
   }
   
