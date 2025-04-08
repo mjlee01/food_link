@@ -41,48 +41,48 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCMJt4lCLlDhJHcJN0z0yP57C239KURZ-8',
-    appId: '1:964131940870:web:339f18dec5eff3aefcf187',
-    messagingSenderId: '964131940870',
-    projectId: 'kitahack-foodlink-627c2',
-    authDomain: 'kitahack-foodlink-627c2.firebaseapp.com',
-    storageBucket: 'kitahack-foodlink-627c2.firebasestorage.app',
-    measurementId: 'G-MSDPG16RGV',
+    apiKey: 'AIzaSyCmmln_SE6gf-FLsVemo5py8cKlnR6tI_Y',
+    appId: '1:383144624227:web:847e374df4ea47fcd8f856',
+    messagingSenderId: '383144624227',
+    projectId: 'food-link-b011d',
+    authDomain: 'food-link-b011d.firebaseapp.com',
+    storageBucket: 'food-link-b011d.firebasestorage.app',
+    measurementId: 'G-HTMWLRTV89',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCxNlNe0c-6IX4YHUkDf93dOammA6uG_d8',
-    appId: '1:964131940870:android:2ec55ae6c3ba12bafcf187',
-    messagingSenderId: '964131940870',
-    projectId: 'kitahack-foodlink-627c2',
-    storageBucket: 'kitahack-foodlink-627c2.firebasestorage.app',
+    apiKey: 'AIzaSyBDpx-4TQkbNZiP6_-MiD4CWQp2ONDkBuw',
+    appId: '1:383144624227:android:8c0b4411dcd0d344d8f856',
+    messagingSenderId: '383144624227',
+    projectId: 'food-link-b011d',
+    storageBucket: 'food-link-b011d.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBWRcNhqBIIXG4l6LUEv8aRl142-bi5_D0',
-    appId: '1:964131940870:ios:6b306cba491faee5fcf187',
-    messagingSenderId: '964131940870',
-    projectId: 'kitahack-foodlink-627c2',
-    storageBucket: 'kitahack-foodlink-627c2.firebasestorage.app',
+    apiKey: 'AIzaSyAjkK_xa_wTUB-eapBW48YhukU-l7xjsYg',
+    appId: '1:383144624227:ios:3c3148176a58f63ad8f856',
+    messagingSenderId: '383144624227',
+    projectId: 'food-link-b011d',
+    storageBucket: 'food-link-b011d.firebasestorage.app',
     iosBundleId: 'com.foodLink.app',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyBWRcNhqBIIXG4l6LUEv8aRl142-bi5_D0',
-    appId: '1:964131940870:ios:d9e6a11cd99d8d58fcf187',
-    messagingSenderId: '964131940870',
-    projectId: 'kitahack-foodlink-627c2',
-    storageBucket: 'kitahack-foodlink-627c2.firebasestorage.app',
+    apiKey: 'AIzaSyAjkK_xa_wTUB-eapBW48YhukU-l7xjsYg',
+    appId: '1:383144624227:ios:0dee034e97cbbd9cd8f856',
+    messagingSenderId: '383144624227',
+    projectId: 'food-link-b011d',
+    storageBucket: 'food-link-b011d.firebasestorage.app',
     iosBundleId: 'com.example.foodLink',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyCMJt4lCLlDhJHcJN0z0yP57C239KURZ-8',
-    appId: '1:964131940870:web:c82ee12f4752bbaefcf187',
-    messagingSenderId: '964131940870',
-    projectId: 'kitahack-foodlink-627c2',
-    authDomain: 'kitahack-foodlink-627c2.firebaseapp.com',
-    storageBucket: 'kitahack-foodlink-627c2.firebasestorage.app',
-    measurementId: 'G-XJR2W4K7TT',
+    apiKey: 'AIzaSyCmmln_SE6gf-FLsVemo5py8cKlnR6tI_Y',
+    appId: '1:383144624227:web:a8fdf13f8dc4b559d8f856',
+    messagingSenderId: '383144624227',
+    projectId: 'food-link-b011d',
+    authDomain: 'food-link-b011d.firebaseapp.com',
+    storageBucket: 'food-link-b011d.firebasestorage.app',
+    measurementId: 'G-FGGD2BZEWH',
   );
 }

@@ -1,9 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../app.dart';
 import '../login_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
+
+  static Future<void> signOut(BuildContext context) async {
+    try {
+      await FirebaseAuth.instance.signOut();
+
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('rememberMe', false);
+      } catch (prefError) {
+        print('Error with SharedPreferences during logout: $prefError');
+      }
+
+      // Navigate back to login screen
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => LoginPage()),
+        (route) => false,
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error signing out: $e')));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,12 +44,8 @@ class ProfilePage extends StatelessWidget {
           SizedBox(height: 40),
 
           ElevatedButton(
-            onPressed: () async {
-              await FirebaseAuth.instance.signOut();
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginPage()),
-              );
+            onPressed: () {
+              signOut(context);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red, // Button color

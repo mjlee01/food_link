@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'main_screen.dart';
+import 'package:food_link/services/food_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -19,6 +21,7 @@ class _LoginPageState extends State<LoginPage>
       TextEditingController();
   bool rememberMe = false;
   bool agreeToTerms = false;
+  FoodService foodService = FoodService();
 
   late TabController _tabController;
 
@@ -26,12 +29,69 @@ class _LoginPageState extends State<LoginPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _checkIfUserIsLoggedIn();
+    _loadSavedCredentials();
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    fullNameController.dispose();
+    confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _checkIfUserIsLoggedIn() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      bool shouldRemember = prefs.getBool('rememberMe') ?? false;
+
+      if (shouldRemember && FirebaseAuth.instance.currentUser != null) {
+        _navigateToMainScreen();
+      }
+    } catch (e) {
+      // If SharedPreferences fails, fall back to just Firebase Auth
+      print('Error with SharedPreferences: $e');
+
+      // Still go to main screen if user is logged in
+      if (FirebaseAuth.instance.currentUser != null) {
+        _navigateToMainScreen();
+      }
+    }
+  }
+
+  void _navigateToMainScreen() {
+    Future.delayed(Duration.zero, () {
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => MainScreen()),
+        );
+      }
+    });
+  }
+
+  Future<void> _loadSavedCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      rememberMe = prefs.getBool('rememberMe') ?? false;
+      if (rememberMe) {
+        emailController.text = prefs.getString('email') ?? '';
+      }
+    });
+  }
+
+  Future<void> _saveCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (rememberMe) {
+      await prefs.setBool('rememberMe', true);
+      await prefs.setString('email', emailController.text);
+    } else {
+      await prefs.setBool('rememberMe', false);
+      await prefs.remove('email');
+    }
   }
 
   Future<void> _signInWithEmailAndPassword() async {
@@ -41,11 +101,16 @@ class _LoginPageState extends State<LoginPage>
             email: emailController.text,
             password: passwordController.text,
           );
-      // Navigate to the main screen after successful sign-in
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => MainScreen()),
-      );
+      if (userCredential.user != null) {
+        await FoodService().createUserProfile(userCredential.user!);
+
+        await _saveCredentials();
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => MainScreen()),
+        );
+      }
     } on FirebaseAuthException catch (e) {
       // Handle error (e.g., show a snackbar or dialog)
       print(e.message);
@@ -82,6 +147,15 @@ class _LoginPageState extends State<LoginPage>
         fullNameController.text.trim(),
       );
 
+      if (userCredential.user != null) {
+        await foodService.createUserProfile(
+          userCredential.user!, // Use the actual user from userCredential
+          displayName:
+              fullNameController.text.trim(), // Use the name from your form
+          photoURL: null, // No photo URL from registration form
+        );
+      }
+
       // Navigate to the main screen after successful registration
       Navigator.pushReplacement(
         context,
@@ -104,6 +178,42 @@ class _LoginPageState extends State<LoginPage>
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(errorMessage)));
+    }
+  }
+
+  Future<void> _sendPasswordResetEmail() async {
+    // Get email from user
+    final email = emailController.text.trim();
+
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter your email address')),
+      );
+      return;
+    }
+
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Password reset email sent to $email'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      String errorMessage = 'Failed to send password reset email';
+
+      if (e.code == 'user-not-found') {
+        errorMessage = 'No user found with this email';
+      } else if (e.code == 'invalid-email') {
+        errorMessage = 'The email address is invalid';
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
+      );
     }
   }
 
@@ -178,38 +288,38 @@ class _LoginPageState extends State<LoginPage>
                   children: [_buildSignInForm(), _buildSignUpForm()],
                 ),
               ),
-              Row(
-                children: [
-                  Expanded(child: Divider(color: Colors.grey)),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text("or continue with"),
-                  ),
-                  Expanded(child: Divider(color: Colors.grey)),
-                ],
-              ),
-              SizedBox(height: 16),
+              // Row(
+              //   children: [
+              //     Expanded(child: Divider(color: Colors.grey)),
+              //     Padding(
+              //       padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              //       child: Text("or continue with"),
+              //     ),
+              //     Expanded(child: Divider(color: Colors.grey)),
+              //   ],
+              // ),
+              // SizedBox(height: 16),
 
-              // Social Media Buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircleAvatar(
-                    backgroundColor: Colors.red,
-                    child: Icon(Icons.g_mobiledata, color: Colors.white),
-                  ),
-                  SizedBox(width: 16),
-                  CircleAvatar(
-                    backgroundColor: Colors.blue,
-                    child: Icon(Icons.facebook, color: Colors.white),
-                  ),
-                  SizedBox(width: 16),
-                  CircleAvatar(
-                    backgroundColor: Colors.black,
-                    child: Icon(Icons.apple, color: Colors.white),
-                  ),
-                ],
-              ),
+              // // Social Media Buttons
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.center,
+              //   children: [
+              //     CircleAvatar(
+              //       backgroundColor: Colors.red,
+              //       child: Icon(Icons.g_mobiledata, color: Colors.white),
+              //     ),
+              //     SizedBox(width: 16),
+              //     CircleAvatar(
+              //       backgroundColor: Colors.blue,
+              //       child: Icon(Icons.facebook, color: Colors.white),
+              //     ),
+              //     SizedBox(width: 16),
+              //     CircleAvatar(
+              //       backgroundColor: Colors.black,
+              //       child: Icon(Icons.apple, color: Colors.white),
+              //     ),
+              //   ],
+              // ),
             ],
           ),
         ),
@@ -274,7 +384,51 @@ class _LoginPageState extends State<LoginPage>
             ),
             TextButton(
               onPressed: () {
-                // Handle forgot password
+                if (emailController.text.isEmpty) {
+                  showDialog(
+                    context: context,
+                    builder:
+                        (context) => AlertDialog(
+                          title: Text('Reset Password'),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Enter your email to receive a password reset link',
+                              ),
+                              SizedBox(height: 12),
+                              TextField(
+                                controller: emailController,
+                                decoration: InputDecoration(
+                                  labelText: 'Email',
+                                  border: OutlineInputBorder(),
+                                ),
+                                keyboardType: TextInputType.emailAddress,
+                              ),
+                            ],
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: Text('Cancel'),
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                _sendPasswordResetEmail();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                              ),
+                              child: Text('Send Reset Link'),
+                            ),
+                          ],
+                        ),
+                  );
+                } else {
+                  // Email already entered, just send reset link
+                  _sendPasswordResetEmail();
+                }
               },
               child: Text("Forgot Password?"),
             ),

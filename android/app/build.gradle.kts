@@ -20,7 +20,7 @@ dependencies {
 android {
     namespace = "com.example.food_link"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = "27.0.12077973"
+    ndkVersion = "27.2.12479018"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -36,8 +36,8 @@ android {
         applicationId = "com.example.food_link"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 23
-        targetSdk = flutter.targetSdkVersion
+        minSdkVersion(23)
+        targetSdkVersion(30)
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }

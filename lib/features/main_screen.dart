@@ -5,6 +5,7 @@ import 'inventory/inventory_view.dart';
 import 'scan/scan_view.dart';
 import 'foodhub/foodhub_view.dart';
 import 'profile/profile_view.dart';
+import 'foodhub/chat/chat_list.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -19,7 +20,7 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _pages = const [
     HomePage(),
     SearchPage(),
-    FavoritesPage(),
+    ScanPage(),
     FoodHubPage(),
     ProfilePage(),
   ];
@@ -58,6 +59,17 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         title: const Text('Food Link', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.green,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.chat, color: Colors.white),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ChatsListPage()),
+              );
+            },
+          ),
+        ],
       ),
       body: _pages[_currentIndex],
       bottomNavigationBar: Container(
