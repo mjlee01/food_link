@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:food_link/utils/cloudinary/images_upload.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:food_link/utils/constants/colors.dart';
@@ -139,6 +140,8 @@ class _ScanPageState extends State<ScanPage>
   final FocusNode _dropdownFocusNode = FocusNode();
   bool buttonColor = false;
   bool _isCapturing = false; // Add this state variable
+
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -290,7 +293,10 @@ class _ScanPageState extends State<ScanPage>
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Photo captured successfully")),
+        const SnackBar(
+          content: Text("Photo captured successfully"),
+          elevation: 10,
+        ),
       );
     } catch (e) {
       if (!mounted) return;
@@ -328,10 +334,28 @@ class _ScanPageState extends State<ScanPage>
 
     if (!mounted) return;
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text("Image selected: ${image.path}")));
+    // ScaffoldMessenger.of(
+    //   context,
+    // ).showSnackBar(SnackBar(content: Text("Image selected: ${image.path}")));
     await _predictImage(imageFile);
+  }
+
+  Future<void> _selectManualFromGallery() async {
+    // Implement image selection from gallery
+    // For example, using image_picker package
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    setState(() {
+      _capturedImage = image;
+      _isCapturing = false;
+    });
+    final imageFile = File(image!.path);
+
+    if (!mounted) return;
+
+    // ScaffoldMessenger.of(
+    //   context,
+    // ).showSnackBar(SnackBar(content: Text("Image selected: ${image.path}")));
   }
 
   Future<void> _pickDate(BuildContext context) async {
@@ -381,6 +405,7 @@ class _ScanPageState extends State<ScanPage>
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          elevation: 5,
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -556,26 +581,88 @@ class _ScanPageState extends State<ScanPage>
           ),
           actions: [
             ElevatedButton(
-              onPressed: () {
-                final item = InventoryItem(
-                  name: nameController.text.trim(),
-                  category: selectedType.type,
-                  expiryDate: selectedExpiryDate,
-                  quantity: int.tryParse(quantityController.text.trim()) ?? 1,
-                  unit: unitController.text.trim(),
+              onPressed: () async {
+                setState(() {
+                  isLoading = true;
+                });
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Uploading image...'), elevation: 10),
                 );
 
-                _addToInventory(item);
-                Navigator.of(context).pop();
+                final imageUrl = await ImageUploadUtil().uploadImage(
+                  _capturedImage!.path,
+                );
+
+                if (imageUrl == null || imageUrl.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Error uploading image!'),
+                      elevation: 500,
+                    ),
+                  );
+                } else {
+                  try {
+                    final item = InventoryItem(
+                      name: nameController.text.trim(),
+                      category: selectedType.type,
+                      expiryDate: selectedExpiryDate,
+                      quantity:
+                          int.tryParse(quantityController.text.trim()) ?? 1,
+                      unit: unitController.text.trim(),
+                      imageUrl: imageUrl,
+                    );
+
+                    await _addToInventory(item);
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Item added to inventory!',
+                          style: TextStyle(color: FLColors.white),
+                        ),
+                        backgroundColor: FLColors.info,
+                        elevation: 500,
+                      ),
+                    );
+
+                    setState(() {
+                      isLoading = false;
+                    });
+                    Navigator.of(context).pop();
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error adding item: $e')),
+                    );
+                    setState(() {
+                      isLoading = false;
+                    });
+                  }
+                }
               },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                spacing: 6,
-                children: [
-                  Icon(FontAwesomeIcons.plus, color: FLColors.white),
-                  const Text('Add to Inventory'),
-                ],
-              ),
+              child:
+                  isLoading
+                      ? Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                            strokeWidth: 2.0,
+                          ),
+                          const SizedBox(width: 6),
+                          const Text('Uploading...'),
+                        ],
+                      )
+                      : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(FontAwesomeIcons.plus, color: FLColors.white),
+                          const SizedBox(width: 6),
+                          const Text('Add to Inventory'),
+                        ],
+                      ),
             ),
           ],
         );
@@ -1009,18 +1096,67 @@ class _ScanPageState extends State<ScanPage>
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () async {
-                      await _selectFromGallery();
-                      final item = InventoryItem(
-                        name: nameController.text.trim(),
-                        category: groceryTypeController.text.trim(),
-                        expiryDate: DateFormat(
-                          'dd/MM/yyyy',
-                        ).parse(_dateController.text),
-                        quantity:
-                            int.tryParse(quantityController.text.trim()) ?? 1,
-                        unit: groceryUnitController.text.trim(),
+                      await _selectManualFromGallery();
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Uploading image...'),
+                          elevation: 10,
+                        ),
                       );
-                      _addToInventory(item);
+
+                      final imageUrl = await ImageUploadUtil().uploadImage(
+                        _capturedImage!.path,
+                      );
+
+                      if (imageUrl == null || imageUrl.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Error uploading image!'),
+                            elevation: 500,
+                          ),
+                        );
+                      } else {
+                        try {
+                          final item = InventoryItem(
+                            name: nameController.text.trim(),
+                            category: groceryTypeController.text.trim(),
+                            expiryDate: DateFormat(
+                              'dd/MM/yyyy',
+                            ).parse(_dateController.text),
+                            quantity:
+                                int.tryParse(quantityController.text.trim()) ??
+                                1,
+                            unit: groceryUnitController.text.trim(),
+                            note: '',
+                            imageUrl: imageUrl,
+                          );
+
+                          await _addToInventory(item);
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Item added to inventory!',
+                                style: TextStyle(color: FLColors.white),
+                              ),
+                              backgroundColor: FLColors.info,
+                              elevation: 500,
+                            ),
+                          );
+
+                          setState(() {
+                            isLoading = false;
+                          });
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Error adding item: $e')),
+                          );
+                          setState(() {
+                            isLoading = false;
+                          });
+                        }
+                      }
                       setState(() {
                         buttonColor = false;
                       });

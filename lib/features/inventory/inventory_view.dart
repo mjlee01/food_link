@@ -58,14 +58,20 @@ class _InventoryPageState extends State<InventoryPage>
               crossAxisAlignment: CrossAxisAlignment.start,
               children:
                   [
-                        if (data['image_url'] != null &&
-                            data['image_url'].toString().isNotEmpty)
-                          Center(
-                            child: Image.network(
-                              data['image_url'],
-                              height: 200,
-                            ),
+                        Center(
+                          child: Image.network(
+                            data['image_url'] ?? '',
+                            height: 200,
+                            fit: BoxFit.cover,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Center(child: CircularProgressIndicator());
+                            },
+                            errorBuilder: (context, error, stackTrace) {
+                              return Text('Failed to load image');
+                            },
                           ),
+                        ),
                         SizedBox(height: 16),
                         Text("Category: ${data['category']}"),
                         Text("Expiration Date: $formattedExpiry"),
