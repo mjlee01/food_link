@@ -8,6 +8,8 @@ import 'foodhub/foodhub_view.dart';
 import 'package:food_link/utils/constants/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'login_page.dart';
+import 'profile/profile_view.dart';
+import 'foodhub/chat/chat_list.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -26,6 +28,9 @@ class _MainScreenState extends State<MainScreen> {
     FoodHubPage(),
     // NotificationsPage(),
     RecipePage(),
+    ScanPage(),
+    FoodHubPage(),
+    ProfilePage(),
   ];
 
   final _navBarItems = [
@@ -67,6 +72,15 @@ class _MainScreenState extends State<MainScreen> {
           //   icon: const Icon(Icons.notifications, color: FLColors.white),
           //   onPressed: () {},
           // ),
+          IconButton(
+            icon: const Icon(Icons.chat, color: Colors.white),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ChatsListPage()),
+              );
+            },
+          ),
           PopupMenuButton<String>(
             icon: const Icon(Icons.person, color: FLColors.white),
             onSelected: (String result) async {
