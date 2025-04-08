@@ -45,8 +45,7 @@ class _FoodLinkState extends State<FoodLink> {
     return MaterialApp(
       themeMode: ThemeMode.system,
       theme: FLAppTheme.lightTheme,
-      darkTheme: FLAppTheme.darkTheme,
-      // home: const LoginPage(),
+      darkTheme: FLAppTheme.darkTheme, 
       // debugShowCheckedModeBanner: false,
       home:
           _isLoading
