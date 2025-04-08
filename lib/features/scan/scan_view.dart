@@ -136,7 +136,6 @@ class _ScanPageState extends State<ScanPage>
   final TextEditingController nameController = TextEditingController();
   final TextEditingController quantityController = TextEditingController();
 
-
   final FocusNode _dropdownFocusNode = FocusNode();
   bool buttonColor = false;
   bool _isCapturing = false; // Add this state variable
@@ -286,11 +285,10 @@ class _ScanPageState extends State<ScanPage>
       });
       final imageFile = File(photo.path);
 
-      if (!mounted) return;
-
       // Process the image
       await _predictImage(imageFile);
 
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Photo captured successfully")),
       );
@@ -323,19 +321,17 @@ class _ScanPageState extends State<ScanPage>
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
     setState(() {
-        _capturedImage = image;
-        _isCapturing = false;
-      });
+      _capturedImage = image;
+      _isCapturing = false;
+    });
     final imageFile = File(image!.path);
 
     if (!mounted) return;
 
-    if (image != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Image selected: ${image.path}")));
-      await _predictImage(imageFile);
-    }
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text("Image selected: ${image.path}")));
+    await _predictImage(imageFile);
   }
 
   Future<void> _pickDate(BuildContext context) async {
@@ -376,7 +372,6 @@ class _ScanPageState extends State<ScanPage>
     );
     final quantityController = TextEditingController(text: '1');
     final unitController = TextEditingController(text: defaultUnit.unit);
-    DateTime selectedDate = DateTime.now();
     DateTime selectedExpiryDate = getEstimatedExpiryDate(_predictionLabel);
     final expiryDateController = TextEditingController(
       text: selectedExpiryDate.toLocal().toString().split(' ')[0],
@@ -766,7 +761,7 @@ class _ScanPageState extends State<ScanPage>
                 ElevatedButton(
                   onPressed: () async {
                     await _capturePhoto();
-
+                    if (!mounted) return;
                     if (_predictionLabel != null &&
                         _predictionConfidence != null) {
                       _showPredictionModal(context);
@@ -789,6 +784,8 @@ class _ScanPageState extends State<ScanPage>
                 OutlinedButton(
                   onPressed: () async {
                     await _selectFromGallery();
+
+                    if (!mounted) return;
 
                     if (_predictionLabel != null &&
                         _predictionConfidence != null) {
@@ -1016,8 +1013,11 @@ class _ScanPageState extends State<ScanPage>
                       final item = InventoryItem(
                         name: nameController.text.trim(),
                         category: groceryTypeController.text.trim(),
-                        expiryDate: DateFormat('dd/MM/yyyy').parse(_dateController.text),
-                        quantity: int.tryParse(quantityController.text.trim()) ?? 1,
+                        expiryDate: DateFormat(
+                          'dd/MM/yyyy',
+                        ).parse(_dateController.text),
+                        quantity:
+                            int.tryParse(quantityController.text.trim()) ?? 1,
                         unit: groceryUnitController.text.trim(),
                       );
                       _addToInventory(item);
