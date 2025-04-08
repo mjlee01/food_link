@@ -263,7 +263,7 @@ class _InventoryPageState extends State<InventoryPage>
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Search grocery...',
+                hintText: 'Search grocery by name',
                 prefixIcon: Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),

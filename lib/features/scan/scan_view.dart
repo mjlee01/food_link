@@ -9,6 +9,8 @@ import 'package:food_link/features/main_screen.dart';
 import 'dart:collection';
 import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
+import 'package:food_link/features/inventory/inventory_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as img;
@@ -82,9 +84,38 @@ enum GroceryUnit {
       );
 }
 
+final Map<int, String> classNameMap = {
+  0: 'Banana - Green',
+  1: 'Banana - Semiripe',
+  2: 'Banana - Ripe',
+  3: 'Banana - Overripe',
+  4: 'Avocado - Underripe',
+  5: 'Avocado - Breaking',
+  6: 'Avocado - Ripe_1',
+  7: 'Avocado - Ripe_2',
+  8: 'Avocado - Overripe',
+};
+
+DateTime getEstimatedExpiryDate(int? classIndex) {
+  Map<int, int> expiryDaysMap = {
+    0: 7, // Banana - Green
+    1: 5, // Banana - Semiripe
+    2: 3, // Banana - Ripe
+    3: 2, // Banana - Overripe
+    4: 10, // Avocado - Underripe
+    5: 8, // Avocado - Breaking
+    6: 6, // Avocado - Ripe_1
+    7: 4, // Avocado - Ripe_2
+    8: 2, // Avocado - Overripe
+  };
+
+  // Default expiry is 7 days
+  return DateTime.now().add(Duration(days: expiryDaysMap[classIndex] ?? 7));
+}
+
 class _ScanPageState extends State<ScanPage>
     with SingleTickerProviderStateMixin {
-  String? _predictionLabel;
+  int? _predictionLabel;
   double? _predictionConfidence;
   late Interpreter _interpreter;
 
@@ -95,13 +126,16 @@ class _ScanPageState extends State<ScanPage>
   CameraController? _cameraController;
   bool isCameraInitialized = false;
   int _cameraIndex = 0;
+  XFile? _capturedImage;
 
   final TextEditingController groceryTypeController = TextEditingController();
   final TextEditingController groceryUnitController = TextEditingController();
+  final TextEditingController _dateController = TextEditingController();
   GroceryType? selectedGrocery;
   GroceryUnit? selectedUnit;
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController quantityController = TextEditingController();
 
-  final TextEditingController _dateController = TextEditingController();
 
   final FocusNode _dropdownFocusNode = FocusNode();
   bool buttonColor = false;
@@ -193,7 +227,7 @@ class _ScanPageState extends State<ScanPage>
       );
 
       setState(() {
-        _predictionLabel = "Class: $maxIndex";
+        _predictionLabel = maxIndex;
         _predictionConfidence = confidences[maxIndex];
       });
     } catch (e) {
@@ -246,6 +280,10 @@ class _ScanPageState extends State<ScanPage>
       });
 
       final XFile photo = await _cameraController!.takePicture();
+      setState(() {
+        _capturedImage = photo;
+        _isCapturing = false;
+      });
       final imageFile = File(photo.path);
 
       if (!mounted) return;
@@ -284,6 +322,10 @@ class _ScanPageState extends State<ScanPage>
     // For example, using image_picker package
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    setState(() {
+        _capturedImage = image;
+        _isCapturing = false;
+      });
     final imageFile = File(image!.path);
 
     if (!mounted) return;
@@ -310,6 +352,240 @@ class _ScanPageState extends State<ScanPage>
         ).format(picked); // Auto-fill text field
       });
     }
+  }
+
+  Future<void> _addToInventory(InventoryItem item) async {
+    final collection = FirebaseFirestore.instance.collection('groceries');
+    await collection.add(item.toMap());
+  }
+
+  void _showPredictionModal(BuildContext context) {
+    GroceryType defaultType = GroceryType.values.firstWhere(
+      (e) => e.type == 'Fruit',
+      orElse: () => GroceryType.other,
+    );
+    GroceryType selectedType = defaultType;
+
+    GroceryUnit defaultUnit = GroceryUnit.values.firstWhere(
+      (e) => e.unit == 'Piece(s)',
+      orElse: () => GroceryUnit.other,
+    );
+
+    final nameController = TextEditingController(
+      text: classNameMap[_predictionLabel] ?? 'Unknown',
+    );
+    final quantityController = TextEditingController(text: '1');
+    final unitController = TextEditingController(text: defaultUnit.unit);
+    DateTime selectedDate = DateTime.now();
+    DateTime selectedExpiryDate = getEstimatedExpiryDate(_predictionLabel);
+    final expiryDateController = TextEditingController(
+      text: selectedExpiryDate.toLocal().toString().split(' ')[0],
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Confirm Grocery Details'),
+              IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: Icon(
+                  FontAwesomeIcons.xmark,
+                  color: FLColors.dark,
+                  size: 16,
+                ),
+                style: ButtonStyle(
+                  backgroundColor: WidgetStateProperty.all(
+                    Colors.black.withValues(alpha: 0.03),
+                  ),
+                  padding: WidgetStateProperty.all(EdgeInsets.zero),
+                ),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 10,
+              children: [
+                if (_capturedImage != null)
+                  Center(
+                    child: Column(
+                      children: [
+                        Image.file(
+                          File(_capturedImage!.path),
+                          width: 200,
+                          height: 200,
+                          fit: BoxFit.cover,
+                        ),
+                        Container(
+                          width: 200,
+                          alignment: Alignment.center,
+                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Color.fromARGB(129, 0, 162, 255),
+                                Color.fromARGB(122, 0, 255, 145),
+                              ],
+                            ),
+                          ),
+                          child: Text(
+                            'CONFIDENCE: ${(_predictionConfidence! * 100).toStringAsFixed(2)}%',
+                            style: TextStyle(
+                              color: FLColors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                      ],
+                    ),
+                  ),
+                TextField(
+                  maxLength: 60,
+                  controller: nameController,
+                  decoration: InputDecoration(
+                    labelText: "  Enter Grocery Name",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: FLColors.primary),
+                    ),
+                  ),
+                ),
+                OutlinedButton(
+                  onPressed: () {
+                    _pickDate(context);
+                    setState(() {
+                      buttonColor = true;
+                    });
+                  },
+                  style: Theme.of(context).outlinedButtonTheme.style?.copyWith(
+                    minimumSize: WidgetStateProperty.all(const Size(50, 40)),
+                    side: WidgetStateProperty.all(
+                      BorderSide(
+                        color: buttonColor ? FLColors.black : Colors.grey[300]!,
+                      ),
+                    ),
+                  ),
+                  child: Row(
+                    spacing: 15,
+                    children: [
+                      Icon(
+                        FontAwesomeIcons.calendarDays,
+                        color: Colors.grey[600],
+                      ),
+
+                      Text(
+                        expiryDateController.text.isNotEmpty
+                            ? expiryDateController.text
+                            : "Pick an Expiry Date",
+                        style: TextStyle(fontWeight: FontWeight.normal),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 5),
+                DropdownMenu<GroceryType>(
+                  initialSelection: selectedType,
+                  menuHeight: 185,
+                  enableFilter: true,
+                  requestFocusOnTap: true,
+                  width: 260,
+                  leadingIcon: const Padding(
+                    padding: EdgeInsets.only(left: 8.0),
+                    child: Icon(Icons.search),
+                  ),
+                  label: const Text('Select a Category'),
+                  inputDecorationTheme: const InputDecorationTheme(
+                    filled: true,
+                    fillColor: Colors.transparent,
+                    contentPadding: EdgeInsets.symmetric(vertical: 5.0),
+                    iconColor: FLColors.white,
+                  ),
+                  menuStyle: MenuStyle(
+                    backgroundColor: WidgetStatePropertyAll(FLColors.white),
+                  ),
+                  onSelected: (GroceryType? newType) {
+                    if (newType != null) {
+                      setState(() => selectedType = newType);
+                    }
+                  },
+                  dropdownMenuEntries: GroceryType.entries,
+                ),
+                SizedBox(height: 5),
+                TextField(
+                  controller: quantityController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Select a Quantity',
+                  ),
+                ),
+                SizedBox(height: 5),
+                DropdownMenu<GroceryUnit>(
+                  initialSelection: selectedUnit,
+                  menuHeight: 185,
+                  enableFilter: true,
+                  requestFocusOnTap: true,
+                  width: 260,
+                  leadingIcon: const Padding(
+                    padding: EdgeInsets.only(left: 8.0),
+                    child: Icon(Icons.search),
+                  ),
+                  label: const Text('Select a Unit'),
+                  controller: unitController,
+                  inputDecorationTheme: const InputDecorationTheme(
+                    filled: true,
+                    fillColor: Colors.transparent,
+                    contentPadding: EdgeInsets.symmetric(vertical: 5.0),
+                    iconColor: FLColors.white,
+                  ),
+                  menuStyle: MenuStyle(
+                    backgroundColor: WidgetStatePropertyAll(FLColors.white),
+                  ),
+                  onSelected: (GroceryUnit? icon) {
+                    setState(() {
+                      selectedUnit = icon;
+                      buttonColor = false;
+                    });
+                  },
+                  dropdownMenuEntries: GroceryUnit.entries,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                final item = InventoryItem(
+                  name: nameController.text.trim(),
+                  category: selectedType.type,
+                  expiryDate: selectedExpiryDate,
+                  quantity: int.tryParse(quantityController.text.trim()) ?? 1,
+                  unit: unitController.text.trim(),
+                );
+
+                _addToInventory(item);
+                Navigator.of(context).pop();
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                spacing: 6,
+                children: [
+                  Icon(FontAwesomeIcons.plus, color: FLColors.white),
+                  const Text('Add to Inventory'),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -442,34 +718,11 @@ class _ScanPageState extends State<ScanPage>
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          "Prediction: $_predictionLabel"
-                          "Confidence: ${(_predictionConfidence! * 100).toStringAsFixed(2)}%"
                           "Position your grocery item within the frame and tap capture",
                           style: Theme.of(context).textTheme.bodyLarge
                               ?.copyWith(color: FLColors.textWhite),
                           textAlign: TextAlign.center,
                         ),
-                        // ⬇️ ADD HERE
-                        if (_predictionLabel != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 10),
-                            child: Column(
-                              children: [
-                                Text(
-                                  "Prediction: $_predictionLabel",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                if (_predictionConfidence != null)
-                                  Text(
-                                    "Confidence: ${(_predictionConfidence! * 100).toStringAsFixed(2)}%",
-                                    style: TextStyle(fontSize: 16),
-                                  ),
-                              ],
-                            ),
-                          ),
                       ],
                     ),
                   ),
@@ -511,7 +764,14 @@ class _ScanPageState extends State<ScanPage>
               spacing: 10,
               children: [
                 ElevatedButton(
-                  onPressed: _capturePhoto,
+                  onPressed: () async {
+                    await _capturePhoto();
+
+                    if (_predictionLabel != null &&
+                        _predictionConfidence != null) {
+                      _showPredictionModal(context);
+                    }
+                  },
                   style: Theme.of(context).elevatedButtonTheme.style?.copyWith(
                     minimumSize: WidgetStateProperty.all(const Size(280, 40)),
                   ),
@@ -527,7 +787,14 @@ class _ScanPageState extends State<ScanPage>
                   ),
                 ),
                 OutlinedButton(
-                  onPressed: _selectFromGallery,
+                  onPressed: () async {
+                    await _selectFromGallery();
+
+                    if (_predictionLabel != null &&
+                        _predictionConfidence != null) {
+                      _showPredictionModal(context);
+                    }
+                  },
                   style: Theme.of(context).outlinedButtonTheme.style?.copyWith(
                     minimumSize: WidgetStateProperty.all(const Size(50, 40)),
                   ),
@@ -562,6 +829,7 @@ class _ScanPageState extends State<ScanPage>
                   ),
                   TextField(
                     maxLength: 60,
+                    controller: nameController,
                     decoration: InputDecoration(
                       labelText: "  Enter Grocery Name",
                       border: OutlineInputBorder(
@@ -595,7 +863,7 @@ class _ScanPageState extends State<ScanPage>
                     requestFocusOnTap: true,
                     width: 350,
                     leadingIcon: const Padding(
-                      padding: EdgeInsets.only(left: 8.0), // Move right a bit
+                      padding: EdgeInsets.only(left: 8.0),
                       child: Icon(Icons.search),
                     ),
                     label: const Text('Select a Category'),
@@ -682,6 +950,7 @@ class _ScanPageState extends State<ScanPage>
                   ),
                   TextField(
                     maxLength: 5,
+                    controller: quantityController,
                     decoration: InputDecoration(
                       labelText: "  Enter Grocery Quantity",
                       border: OutlineInputBorder(
@@ -719,7 +988,7 @@ class _ScanPageState extends State<ScanPage>
                     requestFocusOnTap: true,
                     width: 350,
                     leadingIcon: const Padding(
-                      padding: EdgeInsets.only(left: 8.0), // Move right a bit
+                      padding: EdgeInsets.only(left: 8.0),
                       child: Icon(Icons.search),
                     ),
                     label: const Text('Select a Unit'),
@@ -742,8 +1011,16 @@ class _ScanPageState extends State<ScanPage>
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
-                    onPressed: () {
-                      _selectFromGallery();
+                    onPressed: () async {
+                      await _selectFromGallery();
+                      final item = InventoryItem(
+                        name: nameController.text.trim(),
+                        category: groceryTypeController.text.trim(),
+                        expiryDate: DateFormat('dd/MM/yyyy').parse(_dateController.text),
+                        quantity: int.tryParse(quantityController.text.trim()) ?? 1,
+                        unit: groceryUnitController.text.trim(),
+                      );
+                      _addToInventory(item);
                       setState(() {
                         buttonColor = false;
                       });
