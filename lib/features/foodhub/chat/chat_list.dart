@@ -68,6 +68,7 @@ class _ChatsListPageState extends State<ChatsListPage> {
       appBar: AppBar(
         title: const Text('Messages', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.green,
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       body:
           _isLoading
