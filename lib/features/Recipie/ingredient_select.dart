@@ -28,6 +28,7 @@ class _IngredientSelectPageState extends State<IngredientSelectPage> {
     ); // Initialize with passed ingredients
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Select Ingredients')),
