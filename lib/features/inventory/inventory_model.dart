@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get/get_utils/src/extensions/export.dart';
 
 class InventoryItem {
   String name, category, unit, note, imageUrl;
@@ -23,7 +24,7 @@ class InventoryItem {
       quantity: data['quantity'],
       unit: data['unit'],
       note: data['note'] ?? '',
-      imageUrl: data['image_url'],
+      imageUrl: data['image_url'] ?? 'No Image',
     );
   }
 
