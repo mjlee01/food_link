@@ -28,6 +28,7 @@ class FirestoreService {
       'ingredient': recipe.ingredient,
       'instruction': recipe.instruction,
       'note': recipe.note,
+      'userId': recipe.userId,
     });
   }
 

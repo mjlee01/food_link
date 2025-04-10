@@ -28,6 +28,7 @@ class RecipieGenerator {
         "Step 2 description"
       ],
       "note": "Optional note"
+      "userId": ""
     }
     
     Important:

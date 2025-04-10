@@ -9,6 +9,7 @@ class Recipe {
   final List<String> ingredient;
   final List<String> instruction;
   final String note;
+  String userId;
 
   Recipe({
     required this.id,
@@ -19,6 +20,7 @@ class Recipe {
     required this.ingredient,
     required this.instruction,
     required this.note,
+    required this.userId,
   });
 
   factory Recipe.fromMap(String id, Map<String, dynamic> data) {
@@ -31,6 +33,7 @@ class Recipe {
     ingredient: List<String>.from(data['ingredient'] ?? []),
     instruction: List<String>.from(data['instruction'] ?? []),
     note: data['note'] ?? '',
+    userId: data['userId'],
   );
 }
 }

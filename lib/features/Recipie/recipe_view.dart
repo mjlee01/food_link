@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:food_link/features/Recipie/ingredient_select.dart';
 import 'package:food_link/features/Recipie/recipe_display_view.dart';
 import 'package:food_link/features/Recipie/recipe_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class RecipePage extends StatefulWidget {
   const RecipePage({super.key});
@@ -14,6 +15,7 @@ class RecipePage extends StatefulWidget {
 class _RecipePageState extends State<RecipePage>
     with SingleTickerProviderStateMixin {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
+  String userId = FirebaseAuth.instance.currentUser!.uid;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +28,7 @@ class _RecipePageState extends State<RecipePage>
         iconTheme: const IconThemeData(color: Colors.green),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: _db.collection('recipe').snapshots(),
+        stream: _db.collection('recipe').where('userId', isEqualTo: userId).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());

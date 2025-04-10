@@ -5,6 +5,7 @@ import 'package:food_link/utils/constants/colors.dart';
 import 'package:intl/intl.dart';
 import 'package:food_link/features/Recipie/recipe_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -20,6 +21,7 @@ class _HomePageState extends State<HomePage>
     end: DateTime.now().add(Duration(days: 7)),
   );
   String username = FirebaseAuth.instance.currentUser?.displayName ?? 'Guest';
+  String userId = FirebaseAuth.instance.currentUser!.uid;
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +92,11 @@ class _HomePageState extends State<HomePage>
             ),
 
             StreamBuilder(
-              stream: _db.collection('groceries').snapshots(),
+              stream:
+                  _db
+                      .collection('groceries')
+                      .where('userId', isEqualTo: userId)
+                      .snapshots(),
               builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
@@ -246,7 +252,11 @@ class _HomePageState extends State<HomePage>
             ),
 
             StreamBuilder<QuerySnapshot>(
-              stream: _db.collection('recipe').snapshots(),
+              stream:
+                  _db
+                      .collection('recipe')
+                      .where('userId', isEqualTo: userId)
+                      .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -256,9 +266,9 @@ class _HomePageState extends State<HomePage>
                   return Center(child: Text('Error: ${snapshot.error}'));
                 }
 
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return const Center(child: Text('No recipes found'));
-                }
+                // if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                //   return const Center(child: Text('No recipes found'));
+                // }
 
                 final recipes =
                     snapshot.data!.docs.map((doc) {
@@ -301,9 +311,31 @@ class _HomePageState extends State<HomePage>
                         ),
                       ),
                       recipes.isEmpty
-                          ? const Text(
-                            "No recipes available",
-                            style: TextStyle(color: Colors.grey),
+                          ? SizedBox(
+                            height: 80,
+                            child: Container(
+                              margin: const EdgeInsets.only(bottom: 8.0),
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  top: BorderSide(
+                                    color: Colors.grey.shade300,
+                                    width: 1.0,
+                                  ),
+                                ),
+                              ),
+                              child: const ListTile(
+                                title: Text(
+                                  "No recipes found",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  "Try adding some recipes!",
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                              ),
+                            ),
                           )
                           : SizedBox(
                             height: listHeight,

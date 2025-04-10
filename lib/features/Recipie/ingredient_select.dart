@@ -4,6 +4,7 @@ import 'package:food_link/features/Recipie/recipe_model.dart';
 import 'package:food_link/features/inventory/inventory_model.dart';
 import 'generate_recipe.dart';
 import 'recipe_display_view.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class IngredientSelectPage extends StatefulWidget {
   final List<String> initialIngredient;
@@ -19,6 +20,7 @@ class _IngredientSelectPageState extends State<IngredientSelectPage> {
   late Recipe recipeData;
   late List<String> selectedIngredients; // Change from final to late
   bool isLoading = false;
+  String userId = FirebaseAuth.instance.currentUser!.uid;
 
   @override
   void initState() {
@@ -33,7 +35,7 @@ class _IngredientSelectPageState extends State<IngredientSelectPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('Select Ingredients')),
       body: StreamBuilder<QuerySnapshot>(
-        stream: _db.collection('groceries').snapshots(),
+        stream: _db.collection('groceries').where('userId', isEqualTo: userId).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
