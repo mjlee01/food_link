@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:food_link/features/Recipie/ingredient_select.dart';
 import 'package:food_link/utils/constants/colors.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class InventoryPage extends StatefulWidget {
   const InventoryPage({super.key});
@@ -23,6 +24,8 @@ class _InventoryPageState extends State<InventoryPage>
     end: DateTime(2100),
   );
   bool isDateRangeSelected = false;
+
+  String userId = FirebaseAuth.instance.currentUser!.uid;
 
   void showGroceryDetailsDialog(
     BuildContext context,
@@ -431,7 +434,7 @@ class _InventoryPageState extends State<InventoryPage>
           ),
           Expanded(
             child: StreamBuilder(
-              stream: _db.collection('groceries').snapshots(),
+              stream: _db.collection('groceries').where('userId', isEqualTo: userId).snapshots(),
               builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (!snapshot.hasData) {
                   return Center(child: CircularProgressIndicator());

@@ -12,6 +12,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
 import 'package:food_link/features/inventory/inventory_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as img;
@@ -142,6 +143,8 @@ class _ScanPageState extends State<ScanPage>
   bool _isCapturing = false; // Add this state variable
 
   bool isLoading = false;
+
+  String userId = FirebaseAuth.instance.currentUser!.uid;
 
   @override
   void initState() {
@@ -604,6 +607,7 @@ class _ScanPageState extends State<ScanPage>
                 } else {
                   try {
                     final item = InventoryItem(
+                      userId: userId,
                       name: nameController.text.trim(),
                       category: selectedType.type,
                       expiryDate: selectedExpiryDate,
@@ -1119,6 +1123,7 @@ class _ScanPageState extends State<ScanPage>
                       } else {
                         try {
                           final item = InventoryItem(
+                            userId: userId,
                             name: nameController.text.trim(),
                             category: groceryTypeController.text.trim(),
                             expiryDate: DateFormat(

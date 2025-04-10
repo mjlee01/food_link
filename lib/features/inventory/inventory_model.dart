@@ -2,11 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get_utils/src/extensions/export.dart';
 
 class InventoryItem {
-  String name, category, unit, note, imageUrl;
+  String name, category, unit, note, imageUrl, userId;
   DateTime expiryDate;
   int quantity;
 
   InventoryItem({
+    required this.userId,
     required this.name,
     required this.category,
     required this.expiryDate,
@@ -18,6 +19,7 @@ class InventoryItem {
 
   factory InventoryItem.fromMap(Map<String, dynamic> data) {
     return InventoryItem(
+      userId: data['userId'],
       name: data['name'],
       category: data['category'],
       expiryDate: (data['expiry_date'] as Timestamp).toDate(),
@@ -38,6 +40,7 @@ class InventoryItem {
       'quantity': quantity,
       'unit': unit,
       'image_url': imageUrl,
+      'userId': userId,
     };
   }
   

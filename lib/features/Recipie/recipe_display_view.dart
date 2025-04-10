@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:food_link/data/services/firestore_services.dart';
 import 'package:food_link/features/Recipie/recipe_model.dart';
 import 'package:food_link/utils/constants/colors.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class RecipeDisplayPage extends StatelessWidget {
   final Recipe recipe;
@@ -12,6 +13,7 @@ class RecipeDisplayPage extends StatelessWidget {
     required this.recipe,
     this.isNewRecipe = false, // Default to false
   });
+
 
   @override
   Widget build(BuildContext context) {
@@ -125,10 +127,13 @@ class RecipeDisplayPage extends StatelessWidget {
   Future<void> _saveRecipe(BuildContext context) async {
     try {
       final firestoreService = FirestoreService();
+      final String userId = FirebaseAuth.instance.currentUser!.uid;
+      
+      recipe.userId = userId;
       await firestoreService.saveRecipe(recipe);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Recipe saved successfully!')),
+        const SnackBar(content: Text('Recipe saved successfully!'), backgroundColor: FLColors.info,),
       );
 
       // go back 2 pages
