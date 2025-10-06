@@ -135,7 +135,7 @@ class _ShareFoodModalState extends State<ShareFoodModal> {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
         _foodService
-            .getUserFoodItems(user.uid)
+            .getUserInventory(user.uid)
             .listen(
               (items) {
                 if (mounted) {

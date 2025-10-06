@@ -187,6 +187,34 @@ class FoodService {
           return result;
         });
   }
+  // Get current user's food items
+  Stream<List<FoodItem>> getUserInventory([String? specificUserId]) {
+    final userId = specificUserId ?? _auth.currentUser?.uid;
+    if (userId == null) {
+      return Stream.value([]);
+    }
+
+    return _firestore
+        .collection('groceries')
+        .where('userId', isEqualTo: userId)
+        // .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+          List<FoodItem> result = [];
+
+          for (var doc in snapshot.docs) {
+            try {
+              Map<String, dynamic> data = doc.data();
+
+              result.add(FoodItem.fromMap(data, doc.id));
+            } catch (e) {
+              print("Error processing user's doc ${doc.id}: $e");
+            }
+          }
+
+          return result;
+        });
+  }
 
   // Update a food item
   Future<void> updateFoodItem(FoodItem foodItem) async {
