@@ -1,54 +1,98 @@
-# Food Link App
+# 🌱 FoodLink — Fighting Food Waste with Tech & Community
 
-Food Link is a mobile application designed to help users manage their groceries, reduce food waste, and connect with their community for food sharing.
+**FoodLink** is a mobile app built for **KitaHack 2025**, developed in just under **one month** with the goal of tackling multiple **UN SDGs (1, 2, 3, 8, 11, 12)** — Zero Hunger, Good Health, Responsible Consumption, Sustainable Cities & more 🌍✨
 
-## Core Features
+Powered entirely by **Google Technologies**:
 
-### 1. Home
-- Displays a personalized welcome message.
-- Shows a list of grocery items that are expiring soon, helping users prioritize their usage.
-- Provides quick access to the user's saved recipes.
+> **Flutter • TensorFlow • Firebase • Gemini API • Google Maps API • Teachable Machine** 🚀
 
-### 2. Scan & Add Groceries
-- **Camera Scanning:** Allows users to scan barcodes or use image recognition (e.g., for fruits/vegetables) to quickly add items to their inventory. The app can estimate ripeness and suggest expiry dates for certain items.
-- **Manual Entry:** Provides an interface for users to manually input grocery details, including name, category, quantity, unit, and expiry date.
-- **Image Upload:** Users can attach images to their grocery items for easy identification.
+---
 
-### 3. Inventory Management
-- **Categorized View:** Lists all grocery items, grouped by category (e.g., Fruit, Vegetable, Dairy).
-- **Expiry Tracking:** Clearly displays expiry dates and uses color indicators (e.g., red for expired, yellow for expiring soon) to highlight item status.
-- **Search & Filter:** Users can search for specific items and filter their inventory by date range to easily find what they need.
-- **Item Details:** Tapping on an item shows more details, including its image, category, quantity, expiry date, and any notes. Options to generate recipes or delete items are also available.
+## 📎 Demo & Media
 
-### 4. Recipe Management
-- **View Recipes:** Users can browse their collection of saved recipes.
-- **Create Recipes:** Allows users to create new recipes, potentially by selecting ingredients from their current inventory.
-- **Recipe Display:** Shows recipe details, including ingredients and instructions.
+| Type                                | Link                                 |
+| ----------------------------------- | ------------------------------------ |
+| 🎥 **Demo Video**                   | *[FoodLink Presentation](https://youtu.be/NTVaZK3I1hM)*      |
+| 📑 **Pitch / Slide Deck**           | *[FoodLink Slides](https://www.canva.com/design/DAGkD2bhdO4/z00PPQ2IYG16hIpoREMSkQ/view?utm_content=DAGkD2bhdO4&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=ha7972c3212#1)*  |
 
-### 5. Food Hub (Community Sharing)
-- **Map View:** Displays available food items shared by other users on a map, relative to the user's current location.
-- **Item Listings:** Shows a list of shared food items, which can be filtered by:
-    - **Nearby:** Based on a selectable distance radius.
-    - **Price:** Free, For Sale, Trade.
-- **Share Food:** Users can share their surplus food items by providing details like name, description, price/sharing terms, and location.
-- **Chat Functionality:** Enables users to communicate with each other to arrange pickups or trades for shared items. Users can also see a list of their ongoing chats.
-- **My Shared Items:** A dedicated view for users to manage the items they have shared.
+---
 
-## Quickstart
+## 🌟 Core Features
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/mjlee01/food_link.git
-    ```
-2.  **Navigate to the project directory:**
-    ```bash
-    cd food_link
-    ```
-3.  **Install dependencies:**
-    ```bash
-    flutter pub get
-    ```
-4.  **Run the app:**
-    ```bash
-    flutter run
-    ```
+### 🏠 1. Home Dashboard
+
+* ✅ Personalized greeting
+* ⏰ Highlights **soon-to-expire** groceries
+* 📖 Quick access to **saved recipes**
+
+---
+
+### 📷 2. Scan & Add Groceries
+
+* **Camera Scanning** (barcode + AI image recognition)
+* **Ripeness Detection + Expiry Prediction** 🍌🥬
+* **Manual Entry & Image Upload Support**
+
+---
+
+### 📦 3. Smart Inventory Management
+
+* 📂 Categorized View (Fruit / Veg / Dairy...)
+* ⚠️ Expiry Tracking with **Color Indicators**
+* 🔍 Search + Filter by Date
+* 👆 Tap for Item Details + Generate Recipes
+
+---
+
+### 🍳 4. Recipe Creator & Manager
+
+* Browse saved recipes
+* Select ingredients from inventory to **generate new meals**
+
+---
+
+### 🤝 5. Food Hub — Community Sharing
+
+* 🗺 Google Maps-powered **Food Sharing Map**
+* 🎯 Filter by **Nearby / Free / Trade / Sale**
+* 💬 Built-in chat for pickup/trade coordination
+* 📍 Manage your shared items in **My Listings**
+
+---
+
+## 🚀 Quickstart
+
+```bash
+# Clone the repository
+git clone https://github.com/mjlee01/food_link.git
+
+# Navigate to the project directory
+cd food_link
+
+# Install dependencies
+flutter pub get
+
+# Run the app
+flutter run
+```
+
+## 🙌 Contributors
+
+| Name            | GitHub ID | Role                                  |
+| --------------- | ----------|---------------------------------------|
+| Ming Jia        | @mjlee01  | Home, Inventory, Scan                 |
+| Shin Yen        | @shinyen17| Scan (Fine-tuned model & Integration) |
+| Kang Wei        | @lk-wei   | Recipe (Integratign Gemini API)       |
+| Chen Wei        | @lollwhat | Authentication Page, Virtual Food Hub |
+
+---
+
+## 💡 Future Enhancements
+
+* 🧾 **Auto-Generated Shopping List** based on depleted items
+* 🧠 **AI Meal Recommendations** using Gemini
+* 📊 **Food Waste Analytics Dashboard**
+
+---
+
+Let’s build a world with **less waste & more sharing.** 🌱
